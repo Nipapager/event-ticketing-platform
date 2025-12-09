@@ -49,12 +49,13 @@ public class SecurityConfig {
 
                 // Configure endpoint authorization
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()          // Public: login, register
-                        .requestMatchers("/api/categories/**").permitAll()    // Public: browse categories
-                        .requestMatchers("/api/events/**").permitAll()        // Public: browse events
-                        .requestMatchers("/api/venues/**").permitAll()        // Public: browse venues
-                        .requestMatchers("/api/reviews/**").permitAll()       // Public: read reviews
-                        .anyRequest().authenticated()                         // Everything else requires auth
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/api/events/**").permitAll()
+                        .requestMatchers("/api/venues/**").permitAll()
+                        .requestMatchers("/api/reviews/**").permitAll()
+                        .requestMatchers("/api/roles/**").permitAll()  // ← Πρόσθεσε
+                        .anyRequest().authenticated()
                 )
 
                 // Stateless session (JWT)
