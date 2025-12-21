@@ -7,5 +7,7 @@ public enum EventStatus {
     PENDING,      // Awaiting admin approval
     APPROVED,     // Approved and visible to users
     ACTIVE,       // Event is currently happening
+    REJECTED,     // Rejected by admin
     CANCELLED     // Event has been cancelled
+
 }

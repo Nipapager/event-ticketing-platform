@@ -78,4 +78,13 @@ public class GlobalExceptionHandler {
                 .build();
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<Response<?>> handleForbiddenException(ForbiddenException ex) {
+        Response<?> response = Response.builder()
+                .statusCode(HttpStatus.FORBIDDEN.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 }
