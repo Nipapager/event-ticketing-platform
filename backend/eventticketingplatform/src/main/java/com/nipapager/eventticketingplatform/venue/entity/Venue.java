@@ -42,4 +42,6 @@ public class Venue {
     private String mapCoordinates;  // For Google Maps integration
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }
