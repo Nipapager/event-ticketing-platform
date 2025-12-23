@@ -27,4 +27,6 @@ public class TicketTypeDTO {
     private Integer quantityAvailable;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 }

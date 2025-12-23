@@ -42,6 +42,8 @@ public class TicketType {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime updatedAt;
+
     @PrePersist
     protected void onCreate() {
         if (quantityAvailable == null) {
