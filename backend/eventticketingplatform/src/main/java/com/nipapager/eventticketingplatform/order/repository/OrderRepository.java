@@ -1,9 +1,11 @@
 package com.nipapager.eventticketingplatform.order.repository;
 
-import com.nipapager.eventticketingplatform.category.entity.Category;
+import com.nipapager.eventticketingplatform.enums.OrderStatus;
 import com.nipapager.eventticketingplatform.order.entity.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repository interface for Order entity
@@ -12,4 +14,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
+    // Find orders by user
+    List<Order> findByUserId(Long userId);
+
+    // Find orders by event
+    List<Order> findByEventId(Long eventId);
+
+    // Find orders by status
+    List<Order> findByStatus(OrderStatus status);
+
+    // Find orders by user and status
+    List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);
 }

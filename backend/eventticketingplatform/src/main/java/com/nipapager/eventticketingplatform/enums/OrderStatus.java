@@ -5,6 +5,7 @@ package com.nipapager.eventticketingplatform.enums;
  */
 public enum OrderStatus {
     PENDING,      // Order created, awaiting payment
+    CONFIRMED,    // Payment confirmed, processing tickets
     COMPLETED,    // Payment successful, tickets issued
     CANCELLED     // Order cancelled
 }
