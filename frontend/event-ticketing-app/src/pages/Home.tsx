@@ -1,6 +1,31 @@
+import { useState, useEffect } from 'react';
 import Hero from '../components/layout/Hero';
+import EventCard from '../components/common/EventCard';
+import eventService from '../api/eventService';
+import type { Event } from '../types';
 
 const Home = () => {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch events on component mount
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await eventService.getAllEvents();
+        setEvents(data.slice(0, 4));  // Take first 4 for "Trending"
+      } catch (err: any) {
+        setError('Failed to load events');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
   return (
     <div>
       <Hero />
@@ -9,18 +34,42 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold mb-8">Trending Events Near You</h2>
         
-        {/* Placeholder cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200 animate-pulse"></div>
-              <div className="p-4">
-                <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+        {/* Loading State */}
+        {loading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="h-48 bg-gray-200 animate-pulse"></div>
+                <div className="p-4">
+                  <div className="h-4 bg-gray-200 rounded mb-2 animate-pulse"></div>
+                  <div className="h-3 bg-gray-200 rounded w-2/3 animate-pulse"></div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Events Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {events.length > 0 ? (
+              events.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))
+            ) : (
+              <div className="col-span-4 text-center py-8">
+                <p className="text-gray-600">No events found</p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
