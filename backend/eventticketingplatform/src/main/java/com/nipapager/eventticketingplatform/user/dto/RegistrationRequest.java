@@ -25,10 +25,8 @@ public class RegistrationRequest {
     @Size(min = 3, message = "Password must have at least 3 characters")
     private String password;
 
-    @NotBlank(message = "Address is required")
     private String address;
 
-    @NotBlank(message = "Phone number is required")
     private String phoneNumber;
 
     private List<String> roles;  // Optional, defaults to ROLE_USER if not provided
