@@ -16,37 +16,24 @@ import java.util.List;
 
 @Data
 public class EventDTO {
-
     private Long id;
-
     private String title;
-
     private String description;
-
     private Long categoryId;
-
     private String categoryName;
-
     private Long venueId;
-
     private String venueName;
-
+    private String venueAddress;
+    private String venueCity;
+    private Integer venueCapacity;
     private LocalDate eventDate;
-
     private LocalTime eventTime;
-
     private String imageUrl;
-
     private Long organizerId;
-
     private String organizerName;
-
     private String status;
-
     private Boolean isFeatured;
-
     private List<TicketTypeDTO> ticketTypes;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -338,13 +338,18 @@ public class EventServiceImpl implements EventService {
     private EventDTO mapToDTO(Event event) {
         EventDTO dto = modelMapper.map(event, EventDTO.class);
 
-        // Set IDs and names for relationships
+        // Set category details
         dto.setCategoryId(event.getCategory().getId());
         dto.setCategoryName(event.getCategory().getName());
 
+        // Set venue details
         dto.setVenueId(event.getVenue().getId());
         dto.setVenueName(event.getVenue().getName());
+        dto.setVenueAddress(event.getVenue().getAddress());
+        dto.setVenueCity(event.getVenue().getCity());
+        dto.setVenueCapacity(event.getVenue().getCapacity());
 
+        // Set organizer details
         dto.setOrganizerId(event.getOrganizer().getId());
         dto.setOrganizerName(event.getOrganizer().getName());
 
