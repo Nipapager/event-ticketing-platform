@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Navbar from './components/layout/Navbar';
 import Home from './pages/Home';
 import Footer from './components/layout/Footer';
+import EventsPage from './pages/EventsPage';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/" element={<Home />} />
+              <Route path="/events" element={<EventsPage />} />
             </Routes>
           </main>
           <Footer />
