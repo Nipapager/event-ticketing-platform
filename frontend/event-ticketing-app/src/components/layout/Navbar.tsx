@@ -42,19 +42,19 @@ const Navbar = () => {
                 </Link>
                 
                 {/* Create Event - Only for Organizers/Admins */}
-                {(user?.roles.includes('ROLE_ORGANIZER') || user?.roles.includes('ROLE_ADMIN')) && (
+                {user?.roles?.includes('ROLE_ORGANIZER') || user?.roles?.includes('ROLE_ADMIN') ? (
                   <Link 
                     to="/create-event" 
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Create Event
                   </Link>
-                )}
+                ) : null}
                 
                 {/* User Dropdown */}
                 <div className="relative group">
                   <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600">
-                    <span>{user?.name}</span>
+                    <span>{user?.name || 'User'}</span>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
