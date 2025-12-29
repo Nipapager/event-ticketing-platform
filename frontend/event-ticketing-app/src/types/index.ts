@@ -40,7 +40,11 @@ export interface Event {
   categoryName: string;
   venueId: number;
   venueName: string;
+  venueAddress?: string;
+  venueCity?: string;
+  venueCapacity?: number;
   eventDate: string;
+  eventTime: string;
   imageUrl?: string;
   organizerId: number;
   organizerName: string;
