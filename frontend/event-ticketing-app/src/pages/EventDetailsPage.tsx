@@ -2,15 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eventService from '../api/eventService';
 import type { Event, TicketType } from '../types';
+import authService from '../api/authService';
 
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   // Booking state
   const [selectedTicketType, setSelectedTicketType] = useState<TicketType | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -18,12 +19,12 @@ const EventDetailsPage = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id) return;
-      
+
       try {
         setLoading(true);
         const data = await eventService.getEventById(parseInt(id));
         setEvent(data);
-        
+
         // Auto-select first ticket type
         if (data.ticketTypes && data.ticketTypes.length > 0) {
           setSelectedTicketType(data.ticketTypes[0]);
@@ -42,10 +43,10 @@ const EventDetailsPage = () => {
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString('en-US', {
       weekday: 'long',
-      year: 'numeric', 
-      month: 'long', 
+      year: 'numeric',
+      month: 'long',
       day: 'numeric'
     });
   };
@@ -84,11 +85,26 @@ const EventDetailsPage = () => {
 
   // Handle booking
   const handleBookNow = () => {
+    // Check if user is authenticated
+    if (!authService.isAuthenticated()) {
+      // Redirect to login with return URL
+      navigate('/login', { state: { from: `/events/${id}` } });
+      return;
+    }
+
     if (!selectedTicketType) {
       alert('Please select a ticket type');
       return;
     }
-    alert(`Booking ${quantity} x ${selectedTicketType.name} ticket(s) - Total: €${calculateTotal().toFixed(2)}\n\nBooking feature coming soon!`);
+
+    // Navigate to checkout with booking data
+    navigate('/checkout', {
+      state: {
+        eventId: event!.id,
+        ticketTypeId: selectedTicketType.id,
+        quantity: quantity,
+      },
+    });
   };
 
   if (loading) {
@@ -107,7 +123,7 @@ const EventDetailsPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 text-lg">{error}</p>
-          <button 
+          <button
             onClick={() => navigate('/events')}
             className="mt-4 text-blue-600 hover:underline"
           >
@@ -120,12 +136,12 @@ const EventDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-32 md:pb-8">
-      
+
       {/* Hero Image */}
       <div className="relative h-80 md:h-96 bg-gray-200">
         {event.imageUrl ? (
-          <img 
-            src={event.imageUrl} 
+          <img
+            src={event.imageUrl}
             alt={event.title}
             className="w-full h-full object-cover"
           />
@@ -134,10 +150,10 @@ const EventDetailsPage = () => {
             <span className="text-white text-6xl">🎉</span>
           </div>
         )}
-        
+
         {/* Gradient overlay for depth */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-        
+
         {/* Back button */}
         <button
           onClick={() => navigate('/events')}
@@ -153,10 +169,10 @@ const EventDetailsPage = () => {
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Main content area */}
           <div className="lg:col-span-2">
-            
+
             {/* Event title */}
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               {event.title}
@@ -199,7 +215,7 @@ const EventDetailsPage = () => {
             {/* Location section with map */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Location</h2>
-              
+
               {/* Map placeholder */}
               <div className="bg-gray-200 rounded-lg h-64 mb-4 flex items-center justify-center">
                 <div className="text-center text-gray-500">
@@ -244,11 +260,11 @@ const EventDetailsPage = () => {
           <div className="hidden lg:block lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
               <h2 className="text-xl font-bold text-gray-800 mb-4">Tickets</h2>
-              
+
               {/* Starting price display */}
               <div className="mb-4">
                 <p className="text-3xl font-bold text-gray-800">
-                  From €{event.ticketTypes && event.ticketTypes.length > 0 
+                  From €{event.ticketTypes && event.ticketTypes.length > 0
                     ? Math.min(...event.ticketTypes.map(t => t.price)).toFixed(2)
                     : '0.00'}
                 </p>
@@ -341,12 +357,12 @@ const EventDetailsPage = () => {
             <div>
               <p className="text-sm text-gray-600">From</p>
               <p className="text-2xl font-bold text-gray-800">
-                €{event.ticketTypes && event.ticketTypes.length > 0 
+                €{event.ticketTypes && event.ticketTypes.length > 0
                   ? Math.min(...event.ticketTypes.map(t => t.price)).toFixed(2)
                   : '0.00'}
               </p>
             </div>
-            
+
             {/* Quantity controls */}
             <div className="flex items-center gap-3">
               <button

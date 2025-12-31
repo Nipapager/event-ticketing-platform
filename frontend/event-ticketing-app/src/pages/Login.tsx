@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import authService from '../api/authService';
-import userService from '../api/userService';
 
 const Login = () => {
-  // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,20 +19,10 @@ const Login = () => {
 
     try {
       const response = await authService.login({ email, password });
-      // Now response = { token: "...", roles: [...] }
-
-      console.log('Response:', response);
-      console.log('Token:', response.token);
-
-      // Save token FIRST
-      localStorage.setItem('token', response.token);
-
-      // Fetch profile
-      const user = await userService.getProfile();
-
-      // Save to context
-      login(response.token, user);
-
+      
+      // AuthContext will decode token and extract user info + roles
+      login(response.token, {} as any);
+      
       navigate('/');
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
@@ -47,12 +35,10 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">
           Login
         </h2>
 
-        {/* Error message */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -60,8 +46,6 @@ const Login = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
-          {/* Email field */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email
@@ -77,7 +61,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Password field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
@@ -100,7 +83,6 @@ const Login = () => {
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
-
         </form>
 
         <p className="text-center text-gray-600 mt-6">
@@ -109,7 +91,6 @@ const Login = () => {
             Register here
           </a>
         </p>
-
       </div>
     </div>
   );

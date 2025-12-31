@@ -119,6 +119,16 @@ export interface OrderItem {
   createdAt: string;
 }
 
+export interface OrderRequest {
+  eventId: number;
+  items: OrderItemRequest[];
+}
+
+export interface OrderItemRequest {
+  ticketTypeId: number;
+  quantity: number;
+}
+
 // Review types
 export interface Review {
   id: number;

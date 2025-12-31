@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import type { User } from '../types';
-
-
 
 interface AuthContextType {
   user: User | null;
@@ -11,13 +10,17 @@ interface AuthContextType {
   isAuthenticated: boolean;
 }
 
+interface JWTPayload {
+  userId: number;
+  name: string;
+  sub: string; // email
+  roles: string[];
+  exp: number;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-
-  // State for user and token
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
@@ -25,20 +28,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-
+    
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      try {
+        // Decode token to get fresh data including roles
+        const decoded = jwtDecode<JWTPayload>(storedToken);
+        
+        // Check if token is expired
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          // Token expired, logout
+          logout();
+          return;
+        }
+
+        const userData = {
+          id: decoded.userId,
+          name: decoded.name,
+          email: decoded.sub,
+          roles: decoded.roles || []
+        };
+
+        setToken(storedToken);
+        setUser(userData as User);
+      } catch (error) {
+        console.error('Failed to decode token:', error);
+        logout();
+      }
     }
   }, []);
 
   // Login function
   const login = (newToken: string, newUser: User) => {
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
+    try {
+      // Decode token to extract roles
+      const decoded = jwtDecode<JWTPayload>(newToken);
+      
+      // Merge user data with roles from token
+      const userData = {
+        ...newUser,
+        roles: decoded.roles || []
+      };
 
+      console.log('🔍 Login - Decoded Token:', decoded);
+      console.log('👤 Login - User Data:', userData);
+
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      setToken(newToken);
+      setUser(userData as User);
+    } catch (error) {
+      console.error('Failed to decode token on login:', error);
+      // Fallback to provided user data
+      localStorage.setItem('token', newToken);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setToken(newToken);
+      setUser(newUser);
+    }
   };
 
   // Logout function
@@ -47,10 +94,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
-
   };
 
-  // Check if user is authenticated
   const isAuthenticated = !!token && !!user;
 
   return (
@@ -59,7 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
-
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
