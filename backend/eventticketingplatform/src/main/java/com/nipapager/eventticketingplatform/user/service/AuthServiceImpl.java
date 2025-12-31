@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -83,12 +84,12 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
 
-        // Generate token (auto-login after registration)
-        String token = jwtUtils.generateToken(savedUser.getEmail());
+        // Generate token WITH user details (includes roles, name, userId)
+        String token = jwtUtils.generateToken((UserDetails) savedUser);
 
         // Extract role names
         List<String> roleNames = savedUser.getRoles().stream()
-                .map(role -> role.getName().name())  // Convert enum to String
+                .map(role -> role.getName().name())
                 .toList();
 
         // Build response
@@ -124,8 +125,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Account is not active. Please contact support.");
         }
 
-        // Generate token
-        String token = jwtUtils.generateToken(user.getEmail());
+        // Generate token WITH user details (includes roles, name, userId)
+        String token = jwtUtils.generateToken((UserDetails) user);
         log.info("Login successful for user: {}", user.getEmail());
 
         // Extract role names
