@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import eventService from '../api/eventService';
 import authService from '../api/authService';
 import type { Event } from '../types';
@@ -33,6 +34,7 @@ const MyEventsPage = () => {
       setEvents(data);
     } catch (error) {
       console.error('Failed to fetch events:', error);
+      toast.error('Failed to load events');
     } finally {
       setLoading(false);
     }
@@ -51,10 +53,10 @@ const MyEventsPage = () => {
 
     try {
       await eventService.deleteEvent(id);
-      alert('Event cancelled successfully');
+      toast.success('Event cancelled successfully');
       fetchMyEvents(); // Refresh list
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to cancel event');
+      toast.error(error.response?.data?.message || 'Failed to cancel event');
     }
   };
 

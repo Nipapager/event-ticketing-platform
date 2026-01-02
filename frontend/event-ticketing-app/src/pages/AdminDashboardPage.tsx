@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import eventService from '../api/eventService';
 import authService from '../api/authService';
 import { useAuth } from '../context/AuthContext';
@@ -34,6 +35,7 @@ const AdminDashboardPage = () => {
       setEvents(data);
     } catch (error) {
       console.error('Failed to fetch events:', error);
+      toast.error('Failed to load events');
     } finally {
       setLoading(false);
     }
@@ -52,10 +54,10 @@ const AdminDashboardPage = () => {
 
     try {
       await eventService.approveEvent(id);
-      alert('Event approved successfully!');
+      toast.success('Event approved successfully!');
       fetchAllEvents();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to approve event');
+      toast.error(error.response?.data?.message || 'Failed to approve event');
     }
   };
 
@@ -64,10 +66,10 @@ const AdminDashboardPage = () => {
 
     try {
       await eventService.rejectEvent(id);
-      alert('Event rejected');
+      toast.success('Event rejected');
       fetchAllEvents();
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Failed to reject event');
+      toast.error(error.response?.data?.message || 'Failed to reject event');
     }
   };
 

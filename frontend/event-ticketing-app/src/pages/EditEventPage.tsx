@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import eventService from '../api/eventService';
 import ticketTypeService from '../api/ticketTypeService';
 import categoryService from '../api/categoryService';
@@ -60,14 +61,14 @@ const EditEventPage = () => {
 
       // Check if event can be edited
       if (eventData.status === 'CANCELLED') {
-        alert('Cannot edit cancelled event');
+        toast.error('Cannot edit cancelled event');
         navigate('/my-events');
         return;
       }
 
       const eventDate = new Date(eventData.eventDate);
       if (eventDate < new Date()) {
-        alert('Cannot edit past event');
+        toast.error('Cannot edit past event');
         navigate('/my-events');
         return;
       }
@@ -100,7 +101,7 @@ const EditEventPage = () => {
       }
     } catch (error: any) {
       console.error('Failed to load event:', error);
-      alert(error.response?.data?.message || 'Failed to load event');
+      toast.error(error.response?.data?.message || 'Failed to load event');
       navigate('/my-events');
     } finally {
       setLoading(false);
@@ -136,9 +137,9 @@ const EditEventPage = () => {
 
       try {
         await ticketTypeService.deleteTicketType(ticket.id);
-        alert('Ticket type deleted successfully');
+        toast.success('Ticket type deleted successfully');
       } catch (error: any) {
-        alert(error.response?.data?.message || 'Failed to delete ticket type');
+        toast.error(error.response?.data?.message || 'Failed to delete ticket type');
         return;
       }
     }
@@ -174,6 +175,7 @@ const EditEventPage = () => {
     if (!validateForm()) return;
 
     setSubmitting(true);
+    const toastId = toast.loading('Updating event...');
 
     try {
       // Update event
@@ -204,11 +206,11 @@ const EditEventPage = () => {
         })
       );
 
-      alert('Event updated successfully!');
+      toast.success('Event updated successfully!', { id: toastId });
       navigate('/my-events');
     } catch (error: any) {
       console.error('Failed to update event:', error);
-      alert(error.response?.data?.message || 'Failed to update event');
+      toast.error(error.response?.data?.message || 'Failed to update event', { id: toastId });
     } finally {
       setSubmitting(false);
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import eventService from '../api/eventService';
 import ticketTypeService from '../api/ticketTypeService';
 import categoryService from '../api/categoryService';
@@ -57,6 +58,7 @@ const CreateEventPage = () => {
       setVenues(venuesData);
     } catch (error) {
       console.error('Failed to load categories/venues', error);
+      toast.error('Failed to load form data');
     }
   };
 
@@ -114,6 +116,7 @@ const CreateEventPage = () => {
     if (!validateForm()) return;
 
     setLoading(true);
+    const toastId = toast.loading('Creating event...');
 
     try {
       // Step 1: Create event
@@ -134,11 +137,11 @@ const CreateEventPage = () => {
         )
       );
 
-      alert('Event created successfully! Awaiting admin approval.');
+      toast.success('Event created successfully! Awaiting admin approval.', { id: toastId });
       navigate('/my-events');
     } catch (error: any) {
       console.error('Failed to create event:', error);
-      alert(error.response?.data?.message || 'Failed to create event');
+      toast.error(error.response?.data?.message || 'Failed to create event', { id: toastId });
     } finally {
       setLoading(false);
     }
