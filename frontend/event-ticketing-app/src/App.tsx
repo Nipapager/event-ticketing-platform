@@ -11,6 +11,9 @@ import CheckoutPage from './pages/CheckoutPage';
 import PaymentConfirmationPage from './pages/PaymentConfirmationPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import CreateEventPage from './pages/CreateEventPage';
+import MyEventsPage from './pages/MyEventsPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import EditEventPage from './pages/EditEventPage';
 
 function App() {
   return (
@@ -29,6 +32,9 @@ function App() {
               <Route path="/payment-confirmation" element={<PaymentConfirmationPage />} />
               <Route path="/my-tickets" element={<MyTicketsPage />} />
               <Route path="/create-event" element={<CreateEventPage />} />
+              <Route path="/my-events" element={<MyEventsPage />} />
+              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/edit-event/:id" element={<EditEventPage />} />
             </Routes>
           </main>
           <Footer />

@@ -41,14 +41,32 @@ const Navbar = () => {
                   My Tickets
                 </Link>
                 
-                {/* Create Event - Only for Organizers/Admins */}
-                {user?.roles?.includes('ROLE_ORGANIZER') || user?.roles?.includes('ROLE_ADMIN') ? (
+                {/* Admin Link */}
+                {user?.roles?.includes('ROLE_ADMIN') ? (
                   <Link 
-                    to="/create-event" 
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    to="/admin/dashboard" 
+                    className="text-gray-700 hover:text-blue-600 font-medium"
                   >
-                    Create Event
+                    Admin Dashboard
                   </Link>
+                ) : null}
+                
+                {/* Organizer/Admin Links */}
+                {user?.roles?.includes('ROLE_ORGANIZER') || user?.roles?.includes('ROLE_ADMIN') ? (
+                  <>
+                    <Link 
+                      to="/my-events" 
+                      className="text-gray-700 hover:text-blue-600 font-medium"
+                    >
+                      My Events
+                    </Link>
+                    <Link 
+                      to="/create-event" 
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Create Event
+                    </Link>
+                  </>
                 ) : null}
                 
                 {/* User Dropdown */}
