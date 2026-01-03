@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import userService from '../api/userService';
 import authService from '../api/authService';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -104,11 +105,7 @@ const ProfilePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading profile...</div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading profile..." />;
   }
 
   return (

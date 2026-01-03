@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import eventService from '../api/eventService';
 import type { Event, TicketType } from '../types';
 import authService from '../api/authService';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -108,14 +109,7 @@ const EventDetailsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading event...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading event details..." />;
   }
 
   if (error || !event) {

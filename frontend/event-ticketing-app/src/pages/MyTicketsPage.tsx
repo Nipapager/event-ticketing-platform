@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import orderService from '../api/orderService';
 import authService from '../api/authService';
 import type { Order } from '../types';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const MyTicketsPage = () => {
   const navigate = useNavigate();
@@ -59,14 +60,7 @@ const MyTicketsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading your tickets...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading your tickets..." />;
   }
 
   if (error) {
@@ -88,7 +82,7 @@ const MyTicketsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">My Tickets</h1>
@@ -121,7 +115,7 @@ const MyTicketsPage = () => {
             {orders.map((order) => (
               <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="p-6">
-                  
+
                   {/* Order Header */}
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-4 border-b">
                     <div className="mb-2 md:mb-0">
@@ -141,7 +135,7 @@ const MyTicketsPage = () => {
 
                   {/* Order Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    
+
                     {/* Left: Tickets */}
                     <div>
                       <h4 className="text-sm font-semibold text-gray-700 mb-2">Tickets</h4>
@@ -215,7 +209,7 @@ const MyTicketsPage = () => {
                     >
                       View Event
                     </button>
-                    
+
                     {order.status === 'CONFIRMED' && (
                       <button className="flex-1 md:flex-none bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
                         Download Tickets

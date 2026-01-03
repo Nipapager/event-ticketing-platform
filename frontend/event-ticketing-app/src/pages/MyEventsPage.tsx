@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import eventService from '../api/eventService';
 import authService from '../api/authService';
 import type { Event } from '../types';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const MyEventsPage = () => {
   const navigate = useNavigate();
@@ -76,17 +77,13 @@ const MyEventsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading your events...</div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading your events..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -111,11 +108,10 @@ const MyEventsPage = () => {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  filter === status
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === status
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {status}
                 {status === 'ALL' && ` (${events.length})`}
@@ -133,8 +129,8 @@ const MyEventsPage = () => {
             </svg>
             <h3 className="text-xl font-semibold text-gray-800 mb-2">No events found</h3>
             <p className="text-gray-600 mb-6">
-              {filter === 'ALL' 
-                ? "You haven't created any events yet" 
+              {filter === 'ALL'
+                ? "You haven't created any events yet"
                 : `No ${filter.toLowerCase()} events`}
             </p>
             <button
@@ -149,7 +145,7 @@ const MyEventsPage = () => {
             {filteredEvents.map(event => (
               <div key={event.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                 <div className="flex">
-                  
+
                   {/* Event Image */}
                   <div className="w-64 h-48 flex-shrink-0">
                     <img
@@ -215,7 +211,7 @@ const MyEventsPage = () => {
                       >
                         View Details
                       </button>
-                      
+
                       {event.status !== 'CANCELLED' && (
                         <>
                           <button

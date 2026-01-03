@@ -5,6 +5,7 @@ import eventService from '../api/eventService';
 import authService from '../api/authService';
 import { useAuth } from '../context/AuthContext';
 import type { Event } from '../types';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -100,17 +101,13 @@ const AdminDashboardPage = () => {
   const stats = getStats();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading dashboard...</div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading dashboard..." />;
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
@@ -183,11 +180,10 @@ const AdminDashboardPage = () => {
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  filter === status
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === status
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {status}
               </button>
@@ -205,7 +201,7 @@ const AdminDashboardPage = () => {
             {filteredEvents.map(event => (
               <div key={event.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="flex">
-                  
+
                   {/* Event Image */}
                   <div className="w-64 h-48 flex-shrink-0">
                     <img
@@ -271,7 +267,7 @@ const AdminDashboardPage = () => {
                       >
                         View Details
                       </button>
-                      
+
                       {event.status === 'PENDING' && (
                         <>
                           <button

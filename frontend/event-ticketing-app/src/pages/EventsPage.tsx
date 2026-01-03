@@ -4,6 +4,7 @@ import eventService from '../api/eventService';
 import EventCard from '../components/common/EventCard';
 import EventFilters from '../components/events/EventFilters';
 import MobileFilters from '../components/events/MobileFilters';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import type { Event } from '../types';
 
 interface FilterOptions {
@@ -65,7 +66,7 @@ const EventsPage = () => {
     // City filter
     if (filters.cities.length > 0) {
       filtered = filtered.filter(event =>
-        event.venueCity && filters.cities.includes(event.venueCity)  // ← Add null check
+        event.venueCity && filters.cities.includes(event.venueCity)
       );
     }
 
@@ -215,16 +216,8 @@ const EventsPage = () => {
 
             {/* Loading State */}
             {loading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-                    <div className="h-48 bg-gray-200"></div>
-                    <div className="p-4">
-                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                ))}
+              <div className="text-center py-12">
+                <LoadingSpinner size="lg" message="Loading events..." />
               </div>
             )}
 

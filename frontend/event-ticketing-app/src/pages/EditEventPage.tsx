@@ -7,6 +7,7 @@ import categoryService from '../api/categoryService';
 import venueService from '../api/venueService';
 import authService from '../api/authService';
 import type { Category, Venue, Event } from '../types';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 interface TicketType {
   id?: number;
@@ -217,11 +218,7 @@ const EditEventPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading event...</div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen message="Loading event..." />;
   }
 
   return (
