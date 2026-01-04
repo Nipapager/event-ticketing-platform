@@ -13,9 +13,13 @@ import PaymentConfirmationPage from './pages/PaymentConfirmationPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import MyEventsPage from './pages/MyEventsPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminDashboardPage from './pages/EventManagerPage';
 import EditEventPage from './pages/EditEventPage';
 import ProfilePage from './pages/ProfilePage';
+import RequestOrganizerPage from './pages/RequestOrganizerPage';
+import UserManagerPage from './pages/UserManagerPage';
+import EventManagerPage from './pages/EventManagerPage';
+import PastEventsPage from './pages/PastEventsPage';
 
 function App() {
   return (
@@ -35,9 +39,12 @@ function App() {
               <Route path="/my-tickets" element={<MyTicketsPage />} />
               <Route path="/create-event" element={<CreateEventPage />} />
               <Route path="/my-events" element={<MyEventsPage />} />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="/admin/event-manager" element={<EventManagerPage />} />
               <Route path="/edit-event/:id" element={<EditEventPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/request-organizer" element={<RequestOrganizerPage />} />
+              <Route path="/admin/user-manager" element={<UserManagerPage />} />
+              <Route path="/past-events" element={<PastEventsPage />} />
             </Routes>
           </main>
           <Footer />

@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import type { Event } from '../types';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const AdminDashboardPage = () => {
+const EventManagerPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
@@ -110,7 +110,7 @@ const AdminDashboardPage = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage Events</h1>
           <p className="text-gray-600">Manage and approve events</p>
         </div>
 
@@ -302,4 +302,4 @@ const AdminDashboardPage = () => {
   );
 };
 
-export default AdminDashboardPage;
+export default EventManagerPage;

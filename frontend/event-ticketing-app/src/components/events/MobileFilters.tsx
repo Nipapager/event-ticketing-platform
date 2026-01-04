@@ -62,7 +62,7 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
   return (
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black bg-opacity-50 z-40"
         onClick={onClose}
       ></div>
@@ -70,7 +70,7 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
       {/* Modal */}
       <div className="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl z-50 max-h-[80vh] overflow-y-auto">
         <div className="p-6">
-          
+
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-gray-800">Filters</h3>
@@ -115,21 +115,30 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
           </div>
 
           {/* Date */}
-          <div className="mb-6">
-            <h4 className="font-semibold text-gray-800 mb-3">Date</h4>
-            {dateOptions.map((option) => (
-              <label key={option.value} className="flex items-center mb-2">
-                <input
-                  type="radio"
-                  name="date"
-                  value={option.value}
-                  checked={localFilters.dateFilter === option.value}
-                  onChange={() => setLocalFilters({ ...localFilters, dateFilter: option.value })}
-                  className="w-4 h-4 text-blue-600"
-                />
-                <span className="ml-2 text-gray-700">{option.label}</span>
-              </label>
-            ))}
+          <div>
+            <h3 className="font-semibold text-gray-800 mb-3">Date</h3>
+            <div className="space-y-2">
+              {[
+                { value: 'any', label: 'Any Date' },
+                { value: 'today', label: 'Today' },
+                { value: 'week', label: 'This Week' },
+                { value: 'month', label: 'This Month' },
+              ].map((option) => (
+                <label key={option.value} className="flex items-center">
+                  <input
+                    type="radio"
+                    name="dateFilter"
+                    value={option.value}
+                    checked={filters.dateFilter === option.value}
+                    onChange={(e) =>
+                      onChange({ ...filters, dateFilter: e.target.value })
+                    }
+                    className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="ml-2 text-gray-700">{option.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           {/* Price Range */}
@@ -144,9 +153,9 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
               min="0"
               max="500"
               value={localFilters.priceRange[1]}
-              onChange={(e) => setLocalFilters({ 
-                ...localFilters, 
-                priceRange: [0, parseInt(e.target.value)] 
+              onChange={(e) => setLocalFilters({
+                ...localFilters,
+                priceRange: [0, parseInt(e.target.value)]
               })}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />

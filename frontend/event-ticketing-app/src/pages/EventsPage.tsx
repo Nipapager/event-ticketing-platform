@@ -80,18 +80,31 @@ const EventsPage = () => {
     // Date filter
     if (filters.dateFilter !== 'any') {
       const now = new Date();
+      now.setHours(0, 0, 0, 0); // Start of today
+
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.eventDate);
+        eventDate.setHours(0, 0, 0, 0); // Normalize to start of day
 
         switch (filters.dateFilter) {
           case 'today':
-            return eventDate.toDateString() === now.toDateString();
-          case 'weekend':
-            const dayOfWeek = eventDate.getDay();
-            return dayOfWeek === 0 || dayOfWeek === 6;
+            return eventDate.getTime() === now.getTime();
+
+          case 'week': {
+            // Get end of current week (Sunday)
+            const endOfWeek = new Date(now);
+            const daysUntilSunday = 7 - now.getDay(); // 0 (Sunday) to 6 (Saturday)
+            endOfWeek.setDate(now.getDate() + daysUntilSunday);
+            endOfWeek.setHours(23, 59, 59, 999); // End of Sunday
+
+            return eventDate >= now && eventDate <= endOfWeek;
+          }
+
           case 'month':
             return eventDate.getMonth() === now.getMonth() &&
-              eventDate.getFullYear() === now.getFullYear();
+              eventDate.getFullYear() === now.getFullYear() &&
+              eventDate >= now; // Only future dates in current month
+
           default:
             return true;
         }

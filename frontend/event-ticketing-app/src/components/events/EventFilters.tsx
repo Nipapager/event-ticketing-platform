@@ -29,7 +29,7 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
     const newCities = localFilters.cities.includes(city)
       ? localFilters.cities.filter(c => c !== city)
       : [...localFilters.cities, city];
-    
+
     const updated = { ...localFilters, cities: newCities };
     setLocalFilters(updated);
     onChange(updated);
@@ -39,7 +39,7 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
     const newCategories = localFilters.categories.includes(category)
       ? localFilters.categories.filter(c => c !== category)
       : [...localFilters.categories, category];
-    
+
     const updated = { ...localFilters, categories: newCategories };
     setLocalFilters(updated);
     onChange(updated);
@@ -70,7 +70,7 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-gray-800">Filters</h3>
@@ -115,21 +115,30 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
       </div>
 
       {/* Date Filter */}
-      <div className="mb-6">
-        <h4 className="font-semibold text-gray-800 mb-3">Date</h4>
-        {dateOptions.map((option) => (
-          <label key={option.value} className="flex items-center mb-2 cursor-pointer">
-            <input
-              type="radio"
-              name="date"
-              value={option.value}
-              checked={localFilters.dateFilter === option.value}
-              onChange={() => handleDateChange(option.value)}
-              className="w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-gray-700">{option.label}</span>
-          </label>
-        ))}
+      <div>
+        <h3 className="font-semibold text-gray-800 mb-3">Date</h3>
+        <div className="space-y-2">
+          {[
+            { value: 'any', label: 'Any Date' },
+            { value: 'today', label: 'Today' },
+            { value: 'week', label: 'This Week' },
+            { value: 'month', label: 'This Month' },
+          ].map((option) => (
+            <label key={option.value} className="flex items-center">
+              <input
+                type="radio"
+                name="dateFilter"
+                value={option.value}
+                checked={filters.dateFilter === option.value}
+                onChange={(e) =>
+                  onChange({ ...filters, dateFilter: e.target.value })
+                }
+                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-gray-700">{option.label}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* Price Range */}

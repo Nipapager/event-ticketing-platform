@@ -25,14 +25,11 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <Link to="/" className="text-gray-700 hover:text-blue-600 font-medium">
+              Home
+            </Link>
             <Link to="/events" className="text-gray-700 hover:text-blue-600 font-medium">
               Events
-            </Link>
-            <Link to="/events/this-month" className="text-gray-700 hover:text-blue-600 font-medium">
-              This Month
-            </Link>
-            <Link to="/categories" className="text-gray-700 hover:text-blue-600 font-medium">
-              Categories
             </Link>
           </div>
 
@@ -47,15 +44,32 @@ const Navbar = () => {
                   My Tickets
                 </Link>
 
-                {/* Admin Link */}
-                {user?.roles?.includes('ROLE_ADMIN') ? (
+                {user?.roles?.includes('ROLE_USER') && !user?.roles?.includes('ROLE_ORGANIZER') && !user?.roles?.includes('ROLE_ADMIN') && (
                   <Link
-                    to="/admin/dashboard"
+                    to="/request-organizer"
                     className="text-gray-700 hover:text-blue-600 font-medium"
                   >
-                    Admin Dashboard
+                    Become Organizer
                   </Link>
-                ) : null}
+                )}
+
+                {/* Admin Links */}
+                {user?.roles?.includes('ROLE_ADMIN') && (
+                  <>
+                    <Link
+                      to="/admin/event-manager"
+                      className="text-gray-700 hover:text-blue-600 font-medium"
+                    >
+                      Event Manager
+                    </Link>
+                    <Link
+                      to="/admin/user-manager"
+                      className="text-gray-700 hover:text-blue-600 font-medium"
+                    >
+                      User Manager
+                    </Link>
+                  </>
+                )}
 
                 {/* Organizer/Admin Links */}
                 {user?.roles?.includes('ROLE_ORGANIZER') || user?.roles?.includes('ROLE_ADMIN') ? (
@@ -166,25 +180,18 @@ const Navbar = () => {
               {/* Main Navigation */}
               <div className="space-y-1">
                 <Link
+                  to="/"
+                  onClick={closeMobileMenu}
+                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+                >
+                  Home
+                </Link>
+                <Link
                   to="/events"
                   onClick={closeMobileMenu}
                   className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
                 >
                   Events
-                </Link>
-                <Link
-                  to="/events/this-month"
-                  onClick={closeMobileMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-                >
-                  This Month
-                </Link>
-                <Link
-                  to="/categories"
-                  onClick={closeMobileMenu}
-                  className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
-                >
-                  Categories
                 </Link>
               </div>
 
@@ -221,15 +228,34 @@ const Navbar = () => {
                       My Tickets
                     </Link>
 
-                    {/* Admin Link */}
-                    {user?.roles?.includes('ROLE_ADMIN') && (
+                    {user?.roles?.includes('ROLE_USER') && !user?.roles?.includes('ROLE_ORGANIZER') && !user?.roles?.includes('ROLE_ADMIN') && (
                       <Link
-                        to="/admin/dashboard"
+                        to="/request-organizer"
                         onClick={closeMobileMenu}
                         className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
                       >
-                        Admin Dashboard
+                        Become an Organizer
                       </Link>
+                    )}
+
+                    {/* Admin Links */}
+                    {user?.roles?.includes('ROLE_ADMIN') && (
+                      <>
+                        <Link
+                          to="/admin/event-manager"
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+                        >
+                          Event Manager
+                        </Link>
+                        <Link
+                          to="/admin/user-manager"
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+                        >
+                          User Manager
+                        </Link>
+                      </>
                     )}
 
                     {/* Organizer Links */}
