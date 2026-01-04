@@ -43,6 +43,13 @@ const Navbar = () => {
                 >
                   My Tickets
                 </Link>
+                
+                <Link
+                  to="/past-events"
+                  className="text-gray-700 hover:text-blue-600 font-medium"
+                >
+                  Past Events
+                </Link>
 
                 {user?.roles?.includes('ROLE_USER') && !user?.roles?.includes('ROLE_ORGANIZER') && !user?.roles?.includes('ROLE_ADMIN') && (
                   <Link
@@ -226,6 +233,14 @@ const Navbar = () => {
                       className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
                     >
                       My Tickets
+                    </Link>
+                    
+                    <Link
+                      to="/past-events"
+                      onClick={closeMobileMenu}
+                      className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+                    >
+                      Past Events
                     </Link>
 
                     {user?.roles?.includes('ROLE_USER') && !user?.roles?.includes('ROLE_ORGANIZER') && !user?.roles?.includes('ROLE_ADMIN') && (

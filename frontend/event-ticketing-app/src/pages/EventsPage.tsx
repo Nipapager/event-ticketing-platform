@@ -21,6 +21,8 @@ const EventsPage = () => {
   const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState('relevance');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
 
   const [filters, setFilters] = useState<FilterOptions>({
     cities: [],
@@ -38,8 +40,26 @@ const EventsPage = () => {
       try {
         setLoading(true);
         const data = await eventService.getAllEvents();
-        setEvents(data);
-        setFilteredEvents(data);
+        
+        // Filter out past events
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const futureEvents = data.filter(event => {
+          const eventDate = new Date(event.eventDate);
+          eventDate.setHours(0, 0, 0, 0);
+          return eventDate >= today;
+        });
+        
+        setEvents(futureEvents);
+        setFilteredEvents(futureEvents);
+        
+        // Extract unique cities and categories
+        const cities = Array.from(new Set(futureEvents.map(e => e.venueCity).filter(Boolean))) as string[];
+        const categories = Array.from(new Set(futureEvents.map(e => e.categoryName).filter(Boolean))) as string[];
+        
+        setAvailableCities(cities.sort());
+        setAvailableCategories(categories.sort());
       } catch (err: any) {
         setError('Failed to load events');
         console.error(err);
@@ -80,30 +100,28 @@ const EventsPage = () => {
     // Date filter
     if (filters.dateFilter !== 'any') {
       const now = new Date();
-      now.setHours(0, 0, 0, 0); // Start of today
+      now.setHours(0, 0, 0, 0);
 
       filtered = filtered.filter(event => {
         const eventDate = new Date(event.eventDate);
-        eventDate.setHours(0, 0, 0, 0); // Normalize to start of day
+        eventDate.setHours(0, 0, 0, 0);
 
         switch (filters.dateFilter) {
           case 'today':
             return eventDate.getTime() === now.getTime();
 
           case 'week': {
-            // Get end of current week (Sunday)
             const endOfWeek = new Date(now);
-            const daysUntilSunday = 7 - now.getDay(); // 0 (Sunday) to 6 (Saturday)
+            const daysUntilSunday = 7 - now.getDay();
             endOfWeek.setDate(now.getDate() + daysUntilSunday);
-            endOfWeek.setHours(23, 59, 59, 999); // End of Sunday
-
+            endOfWeek.setHours(23, 59, 59, 999);
             return eventDate >= now && eventDate <= endOfWeek;
           }
 
           case 'month':
             return eventDate.getMonth() === now.getMonth() &&
               eventDate.getFullYear() === now.getFullYear() &&
-              eventDate >= now; // Only future dates in current month
+              eventDate >= now;
 
           default:
             return true;
@@ -180,8 +198,6 @@ const EventsPage = () => {
 
             {/* Sort & Filter Controls */}
             <div className="flex items-center gap-3 mt-4 md:mt-0">
-
-              {/* Mobile Filters Button */}
               <button
                 onClick={() => setShowMobileFilters(true)}
                 className="md:hidden flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
@@ -192,7 +208,6 @@ const EventsPage = () => {
                 Filters ({activeFilterCount})
               </button>
 
-              {/* Sort Dropdown */}
               <div className="flex items-center gap-2">
                 <label className="text-gray-700 font-medium hidden md:block">Sort by:</label>
                 <select
@@ -221,27 +236,25 @@ const EventsPage = () => {
               filters={filters}
               onChange={handleFilterChange}
               onClear={handleClearFilters}
+              availableCities={availableCities}
+              availableCategories={availableCategories}
             />
           </aside>
 
           {/* Events Grid */}
           <main className="flex-1">
-
-            {/* Loading State */}
             {loading && (
               <div className="text-center py-12">
                 <LoadingSpinner size="lg" message="Loading events..." />
               </div>
             )}
 
-            {/* Error State */}
             {error && (
               <div className="text-center py-12">
                 <p className="text-red-600 text-lg">{error}</p>
               </div>
             )}
 
-            {/* Events Grid */}
             {!loading && !error && (
               <>
                 {filteredEvents.length > 0 ? (
@@ -265,7 +278,6 @@ const EventsPage = () => {
               </>
             )}
           </main>
-
         </div>
       </div>
 
@@ -276,6 +288,8 @@ const EventsPage = () => {
         filters={filters}
         onChange={handleFilterChange}
         onClear={handleClearFilters}
+        availableCities={availableCities}
+        availableCategories={availableCategories}
       />
 
     </div>

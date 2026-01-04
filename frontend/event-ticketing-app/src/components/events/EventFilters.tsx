@@ -11,19 +11,18 @@ interface EventFiltersProps {
   filters: FilterOptions;
   onChange: (filters: FilterOptions) => void;
   onClear: () => void;
+  availableCities: string[];
+  availableCategories: string[];
 }
 
-const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
+const EventFilters = ({ 
+  filters, 
+  onChange, 
+  onClear,
+  availableCities,
+  availableCategories 
+}: EventFiltersProps) => {
   const [localFilters, setLocalFilters] = useState(filters);
-
-  const cities = ['Athens', 'Thessaloniki', 'Heraklion'];
-  const categories = ['Bar', 'Stadium', 'Theater'];
-  const dateOptions = [
-    { value: 'any', label: 'Any Date' },
-    { value: 'today', label: 'Today' },
-    { value: 'weekend', label: 'This Weekend' },
-    { value: 'month', label: 'This Month' },
-  ];
 
   const handleCityChange = (city: string) => {
     const newCities = localFilters.cities.includes(city)
@@ -41,18 +40,6 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
       : [...localFilters.categories, category];
 
     const updated = { ...localFilters, categories: newCategories };
-    setLocalFilters(updated);
-    onChange(updated);
-  };
-
-  const handleDateChange = (date: string) => {
-    const updated = { ...localFilters, dateFilter: date };
-    setLocalFilters(updated);
-    onChange(updated);
-  };
-
-  const handlePriceChange = (values: [number, number]) => {
-    const updated = { ...localFilters, priceRange: values };
     setLocalFilters(updated);
     onChange(updated);
   };
@@ -85,37 +72,45 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
       {/* City Filter */}
       <div className="mb-6">
         <h4 className="font-semibold text-gray-800 mb-3">City</h4>
-        {cities.map((city) => (
-          <label key={city} className="flex items-center mb-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={localFilters.cities.includes(city)}
-              onChange={() => handleCityChange(city)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-gray-700">{city}</span>
-          </label>
-        ))}
+        {availableCities.length > 0 ? (
+          availableCities.map((city) => (
+            <label key={city} className="flex items-center mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={localFilters.cities.includes(city)}
+                onChange={() => handleCityChange(city)}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-gray-700">{city}</span>
+            </label>
+          ))
+        ) : (
+          <p className="text-sm text-gray-500">No cities available</p>
+        )}
       </div>
 
       {/* Category Filter */}
       <div className="mb-6">
         <h4 className="font-semibold text-gray-800 mb-3">Category</h4>
-        {categories.map((category) => (
-          <label key={category} className="flex items-center mb-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={localFilters.categories.includes(category)}
-              onChange={() => handleCategoryChange(category)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-gray-700">{category}</span>
-          </label>
-        ))}
+        {availableCategories.length > 0 ? (
+          availableCategories.map((category) => (
+            <label key={category} className="flex items-center mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={localFilters.categories.includes(category)}
+                onChange={() => handleCategoryChange(category)}
+                className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-gray-700">{category}</span>
+            </label>
+          ))
+        ) : (
+          <p className="text-sm text-gray-500">No categories available</p>
+        )}
       </div>
 
       {/* Date Filter */}
-      <div>
+      <div className="mb-6">
         <h3 className="font-semibold text-gray-800 mb-3">Date</h3>
         <div className="space-y-2">
           {[
@@ -153,7 +148,11 @@ const EventFilters = ({ filters, onChange, onClear }: EventFiltersProps) => {
           min="0"
           max="500"
           value={localFilters.priceRange[1]}
-          onChange={(e) => handlePriceChange([0, parseInt(e.target.value)])}
+          onChange={(e) => {
+            const updated = { ...localFilters, priceRange: [0, parseInt(e.target.value)] as [number, number] };
+            setLocalFilters(updated);
+            onChange(updated);
+          }}
           className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
         />
       </div>

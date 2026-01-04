@@ -13,19 +13,20 @@ interface MobileFiltersProps {
   filters: FilterOptions;
   onChange: (filters: FilterOptions) => void;
   onClear: () => void;
+  availableCities: string[];
+  availableCategories: string[];
 }
 
-const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFiltersProps) => {
+const MobileFilters = ({ 
+  isOpen, 
+  onClose, 
+  filters, 
+  onChange, 
+  onClear,
+  availableCities,
+  availableCategories 
+}: MobileFiltersProps) => {
   const [localFilters, setLocalFilters] = useState(filters);
-
-  const cities = ['Athens', 'Thessaloniki', 'Heraklion'];
-  const categories = ['Bar', 'Stadium', 'Theater'];
-  const dateOptions = [
-    { value: 'any', label: 'Any Date' },
-    { value: 'today', label: 'Today' },
-    { value: 'weekend', label: 'This Weekend' },
-    { value: 'month', label: 'This Month' },
-  ];
 
   const handleCityChange = (city: string) => {
     const newCities = localFilters.cities.includes(city)
@@ -85,37 +86,45 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
           {/* City */}
           <div className="mb-6">
             <h4 className="font-semibold text-gray-800 mb-3">City</h4>
-            {cities.map((city) => (
-              <label key={city} className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  checked={localFilters.cities.includes(city)}
-                  onChange={() => handleCityChange(city)}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <span className="ml-2 text-gray-700">{city}</span>
-              </label>
-            ))}
+            {availableCities.length > 0 ? (
+              availableCities.map((city) => (
+                <label key={city} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    checked={localFilters.cities.includes(city)}
+                    onChange={() => handleCityChange(city)}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="ml-2 text-gray-700">{city}</span>
+                </label>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No cities available</p>
+            )}
           </div>
 
           {/* Category */}
           <div className="mb-6">
             <h4 className="font-semibold text-gray-800 mb-3">Category</h4>
-            {categories.map((category) => (
-              <label key={category} className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  checked={localFilters.categories.includes(category)}
-                  onChange={() => handleCategoryChange(category)}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <span className="ml-2 text-gray-700">{category}</span>
-              </label>
-            ))}
+            {availableCategories.length > 0 ? (
+              availableCategories.map((category) => (
+                <label key={category} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    checked={localFilters.categories.includes(category)}
+                    onChange={() => handleCategoryChange(category)}
+                    className="w-4 h-4 text-blue-600 rounded"
+                  />
+                  <span className="ml-2 text-gray-700">{category}</span>
+                </label>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No categories available</p>
+            )}
           </div>
 
           {/* Date */}
-          <div>
+          <div className="mb-6">
             <h3 className="font-semibold text-gray-800 mb-3">Date</h3>
             <div className="space-y-2">
               {[
@@ -129,9 +138,9 @@ const MobileFilters = ({ isOpen, onClose, filters, onChange, onClear }: MobileFi
                     type="radio"
                     name="dateFilter"
                     value={option.value}
-                    checked={filters.dateFilter === option.value}
+                    checked={localFilters.dateFilter === option.value}
                     onChange={(e) =>
-                      onChange({ ...filters, dateFilter: e.target.value })
+                      setLocalFilters({ ...localFilters, dateFilter: e.target.value })
                     }
                     className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                   />
