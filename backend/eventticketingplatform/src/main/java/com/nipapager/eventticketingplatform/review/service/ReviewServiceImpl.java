@@ -10,6 +10,7 @@ import com.nipapager.eventticketingplatform.exception.NotFoundException;
 import com.nipapager.eventticketingplatform.order.repository.OrderRepository;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.review.dto.ReviewDTO;
+import com.nipapager.eventticketingplatform.review.dto.ReviewSummaryDTO;
 import com.nipapager.eventticketingplatform.review.entity.Review;
 import com.nipapager.eventticketingplatform.review.repository.ReviewRepository;
 import com.nipapager.eventticketingplatform.user.entity.User;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -256,5 +258,53 @@ public class ReviewServiceImpl implements ReviewService {
         if (!hasCompletedOrder) {
             throw new BadRequestException("You must attend the event to leave a review");
         }
+    }
+
+    @Override
+    public Response<ReviewSummaryDTO> getReviewSummary(Long eventId) {
+        log.info("Fetching review summary for event: {}", eventId);
+
+        // Validate event exists
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event not found");
+        }
+
+        Double averageRating = reviewRepository.getAverageRatingForEvent(eventId);
+        Long totalReviews = reviewRepository.getReviewCountForEvent(eventId);
+
+        ReviewSummaryDTO summary = new ReviewSummaryDTO();
+        summary.setAverageRating(averageRating != null ? Math.round(averageRating * 10.0) / 10.0 : 0.0);
+        summary.setTotalReviews(totalReviews != null ? totalReviews : 0L);
+
+        return Response.<ReviewSummaryDTO>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Review summary retrieved successfully")
+                .data(summary)
+                .build();
+    }
+
+    @Override
+    public Response<ReviewDTO> getUserReviewForEvent(Long eventId) {
+        log.info("Fetching current user's review for event: {}", eventId);
+
+        User user = userService.getCurrentLoggedInUser();
+
+        Optional<Review> review = reviewRepository.findByUserIdAndEventId(user.getId(), eventId);
+
+        if (review.isEmpty()) {
+            return Response.<ReviewDTO>builder()
+                    .statusCode(HttpStatus.OK.value())
+                    .message("No review found")
+                    .data(null)
+                    .build();
+        }
+
+        ReviewDTO reviewDTO = mapToDTO(review.get());
+
+        return Response.<ReviewDTO>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Review retrieved successfully")
+                .data(reviewDTO)
+                .build();
     }
 }

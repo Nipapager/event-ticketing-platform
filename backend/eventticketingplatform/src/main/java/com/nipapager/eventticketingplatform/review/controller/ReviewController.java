@@ -2,6 +2,7 @@ package com.nipapager.eventticketingplatform.review.controller;
 
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.review.dto.ReviewDTO;
+import com.nipapager.eventticketingplatform.review.dto.ReviewSummaryDTO;
 import com.nipapager.eventticketingplatform.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,18 @@ public class ReviewController {
     @GetMapping("/my-reviews")
     public ResponseEntity<Response<List<ReviewDTO>>> getMyReviews() {
         Response<List<ReviewDTO>> response = reviewService.getMyReviews();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/event/{eventId}/summary")
+    public ResponseEntity<Response<ReviewSummaryDTO>> getReviewSummary(@PathVariable Long eventId) {
+        Response<ReviewSummaryDTO> response = reviewService.getReviewSummary(eventId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/event/{eventId}/my-review")
+    public ResponseEntity<Response<ReviewDTO>> getUserReviewForEvent(@PathVariable Long eventId) {
+        Response<ReviewDTO> response = reviewService.getUserReviewForEvent(eventId);
         return ResponseEntity.ok(response);
     }
 }

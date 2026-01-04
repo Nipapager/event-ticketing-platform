@@ -2,6 +2,7 @@ package com.nipapager.eventticketingplatform.review.service;
 
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.review.dto.ReviewDTO;
+import com.nipapager.eventticketingplatform.review.dto.ReviewSummaryDTO;
 
 import java.util.List;
 
@@ -22,4 +23,8 @@ public interface ReviewService {
 
     // Get reviews by current user
     Response<List<ReviewDTO>> getMyReviews();
+
+    Response<ReviewSummaryDTO> getReviewSummary(Long eventId);
+
+    Response<ReviewDTO> getUserReviewForEvent(Long eventId);
 }

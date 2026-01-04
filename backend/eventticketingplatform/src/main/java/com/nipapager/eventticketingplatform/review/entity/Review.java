@@ -41,7 +41,7 @@ public class Review {
 
     @Column(nullable = false)
     @Min(0)
-    @Max(10)
+    @Max(5)
     private Integer rating;
 
     @Column(columnDefinition = "TEXT")
