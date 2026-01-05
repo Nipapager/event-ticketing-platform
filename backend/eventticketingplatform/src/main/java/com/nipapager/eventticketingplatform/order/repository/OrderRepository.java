@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for Order entity
@@ -20,8 +21,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Find orders by event
     List<Order> findByEventId(Long eventId);
 
-    // Find orders by status
-    List<Order> findByStatus(OrderStatus status);
+    // Find order by Stripe
+    Optional<Order> findByStripeSessionId(String stripeSessionId);
 
     // Find orders by user and status
     List<Order> findByUserIdAndStatus(Long userId, OrderStatus status);

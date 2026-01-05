@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import orderService from '../api/orderService';
+import paymentService from '../api/paymentService';
 import eventService from '../api/eventService';
 import authService from '../api/authService';
-import type { Event, TicketType, OrderRequest } from '../types';
+import toast from 'react-hot-toast';
+import type { Event, TicketType } from '../types';
 
 interface CheckoutState {
   eventId: number;
@@ -71,8 +72,8 @@ const CheckoutPage = () => {
       setProcessing(true);
       setError('');
 
-      // Create order request
-      const orderRequest: OrderRequest = {
+      // Create checkout session request
+      const checkoutRequest = {
         eventId: event.id,
         items: [
           {
@@ -82,19 +83,16 @@ const CheckoutPage = () => {
         ],
       };
 
-      // Create order
-      const order = await orderService.createOrder(orderRequest);
+      // Create Stripe checkout session
+      const checkoutResponse = await paymentService.createCheckoutSession(checkoutRequest);
 
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Redirect to Stripe checkout
+      window.location.href = checkoutResponse.sessionUrl;
 
-      // Confirm order (simulate successful payment)
-      await orderService.confirmOrder(order.id);
-
-      // Navigate to confirmation page
-      navigate('/payment-confirmation', { state: { orderId: order.id } });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Booking failed. Please try again.');
+      const errorMessage = err.response?.data?.message || 'Failed to create checkout session. Please try again.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       console.error(err);
     } finally {
       setProcessing(false);
@@ -292,12 +290,12 @@ const CheckoutPage = () => {
                     Processing...
                   </span>
                 ) : (
-                  'Confirm & Pay'
+                  'Proceed to Payment'
                 )}
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-3">
-                Secure payment processing
+                🔒 Secure payment via Stripe
               </p>
             </div>
           </div>

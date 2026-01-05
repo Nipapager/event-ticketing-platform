@@ -70,8 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         roles: decoded.roles || []
       };
 
-      console.log('🔍 Login - Decoded Token:', decoded);
-      console.log('👤 Login - User Data:', userData);
+     
 
       localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(userData));

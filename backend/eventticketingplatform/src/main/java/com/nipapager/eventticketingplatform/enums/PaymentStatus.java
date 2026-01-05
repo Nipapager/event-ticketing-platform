@@ -6,5 +6,6 @@ package com.nipapager.eventticketingplatform.enums;
 public enum PaymentStatus {
     PENDING,      // Payment initiated
     COMPLETED,    // Payment successful
-    ERROR         // Payment failed
+    FAILED,       // Payment failed
+    REFUNDED      // Payment refunded
 }

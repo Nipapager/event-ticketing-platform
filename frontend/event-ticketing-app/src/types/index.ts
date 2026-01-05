@@ -141,3 +141,17 @@ export interface Review {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface CheckoutRequest {
+  eventId: number;
+  items: {
+    ticketTypeId: number;
+    quantity: number;
+  }[];
+}
+
+export interface CheckoutResponse {
+  sessionId: string;
+  sessionUrl: string;
+  orderId: number;
+}

@@ -54,7 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/events/**").permitAll()
                         .requestMatchers("/api/venues/**").permitAll()
                         .requestMatchers("/api/reviews/**").permitAll()
-                        .requestMatchers("/api/roles/**").permitAll()  // ← Πρόσθεσε
+                        .requestMatchers("/api/roles/**").permitAll()
+                        .requestMatchers("/api/payments/webhook").permitAll()
                         .anyRequest().authenticated()
                 )
 

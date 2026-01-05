@@ -9,17 +9,17 @@ import Footer from './components/layout/Footer';
 import EventsPage from './pages/EventsPage';
 import EventDetailsPage from './pages/EventDetailsPage';
 import CheckoutPage from './pages/CheckoutPage';
-import PaymentConfirmationPage from './pages/PaymentConfirmationPage';
 import MyTicketsPage from './pages/MyTicketsPage';
 import CreateEventPage from './pages/CreateEventPage';
 import MyEventsPage from './pages/MyEventsPage';
-import AdminDashboardPage from './pages/EventManagerPage';
 import EditEventPage from './pages/EditEventPage';
 import ProfilePage from './pages/ProfilePage';
 import RequestOrganizerPage from './pages/RequestOrganizerPage';
 import UserManagerPage from './pages/UserManagerPage';
 import EventManagerPage from './pages/EventManagerPage';
 import PastEventsPage from './pages/PastEventsPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelPage from './pages/PaymentCancelPage';
 
 function App() {
   return (
@@ -35,7 +35,6 @@ function App() {
               <Route path="/events" element={<EventsPage />} />
               <Route path="/events/:id" element={<EventDetailsPage />} />
               <Route path="/checkout" element={<CheckoutPage />} /> 
-              <Route path="/payment-confirmation" element={<PaymentConfirmationPage />} />
               <Route path="/my-tickets" element={<MyTicketsPage />} />
               <Route path="/create-event" element={<CreateEventPage />} />
               <Route path="/my-events" element={<MyEventsPage />} />
@@ -45,6 +44,8 @@ function App() {
               <Route path="/request-organizer" element={<RequestOrganizerPage />} />
               <Route path="/admin/user-manager" element={<UserManagerPage />} />
               <Route path="/past-events" element={<PastEventsPage />} />
+              <Route path="/payment-success" element={<PaymentSuccessPage />} />
+              <Route path="/payment-cancel" element={<PaymentCancelPage />} />
             </Routes>
           </main>
           <Footer />
