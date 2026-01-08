@@ -26,9 +26,11 @@ public class OrderItemDTO {
 
     private BigDecimal pricePerTicket;
 
-    private String qrCodeUrl;
+    private String qrCodeUrl;  // Base64 QR code image
 
-    private String ticketCode;
+    private String ticketCode;  // Unique ticket code
+
+    private Boolean isValid;  // Ticket validity (for refunds)
 
     private LocalDateTime createdAt;
 }

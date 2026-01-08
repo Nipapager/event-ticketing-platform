@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.user.service;
 import com.nipapager.eventticketingplatform.enums.UserRole;
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.role.entity.Role;
 import com.nipapager.eventticketingplatform.role.repository.RoleRepository;
@@ -36,6 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
+    private final NotificationService notificationService;
 
     @Override
     public Response<LoginResponse> register(RegistrationRequest request) {
@@ -83,6 +85,9 @@ public class AuthServiceImpl implements AuthService {
         // Save user
         User savedUser = userRepository.save(user);
         log.info("User registered successfully with ID: {}", savedUser.getId());
+
+        // Send welcome email
+        notificationService.sendWelcomeEmail(savedUser);
 
         // Generate token WITH user details (includes roles, name, userId)
         String token = jwtUtils.generateToken((UserDetails) savedUser);

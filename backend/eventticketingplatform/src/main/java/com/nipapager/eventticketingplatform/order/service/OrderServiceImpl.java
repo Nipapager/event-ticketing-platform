@@ -2,6 +2,7 @@ package com.nipapager.eventticketingplatform.order.service;
 
 import com.nipapager.eventticketingplatform.enums.EventStatus;
 import com.nipapager.eventticketingplatform.enums.OrderStatus;
+import com.nipapager.eventticketingplatform.enums.PaymentStatus;
 import com.nipapager.eventticketingplatform.enums.UserRole;
 import com.nipapager.eventticketingplatform.event.entity.Event;
 import com.nipapager.eventticketingplatform.event.entity.TicketType;
@@ -10,18 +11,22 @@ import com.nipapager.eventticketingplatform.event.repository.TicketTypeRepositor
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.ForbiddenException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.order.dto.OrderDTO;
 import com.nipapager.eventticketingplatform.order.dto.OrderItemDTO;
 import com.nipapager.eventticketingplatform.order.entity.Order;
 import com.nipapager.eventticketingplatform.order.entity.OrderItem;
 import com.nipapager.eventticketingplatform.order.repository.OrderRepository;
 import com.nipapager.eventticketingplatform.order.request.OrderRequest;
+import com.nipapager.eventticketingplatform.payment.entity.Payment;
+import com.nipapager.eventticketingplatform.payment.repository.PaymentRepository;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.user.entity.User;
 import com.nipapager.eventticketingplatform.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +52,8 @@ public class OrderServiceImpl implements OrderService {
     private final TicketTypeRepository ticketTypeRepository;
     private final UserService userService;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional
@@ -263,19 +270,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Response<List<OrderDTO>> getAllOrders() {
-        log.info("Fetching all orders (Admin)");
+        log.info("Fetching all orders for admin");
 
-        // Get all orders
-        List<Order> orders = orderRepository.findAll();
+        List<Order> orders = orderRepository.findAll(Sort.by(Sort.Direction.DESC, "orderDate"));
 
-        // Map to DTOs
         List<OrderDTO> orderDTOs = orders.stream()
                 .map(this::mapToDTO)
-                .collect(Collectors.toList());
+                .toList();
+
+        log.info("Found {} total orders", orderDTOs.size());
 
         return Response.<List<OrderDTO>>builder()
                 .statusCode(HttpStatus.OK.value())
-                .message("All orders retrieved successfully")
+                .message("Orders retrieved successfully")
                 .data(orderDTOs)
                 .build();
     }
@@ -310,30 +317,39 @@ public class OrderServiceImpl implements OrderService {
      * Map Order entity to OrderDTO
      */
     private OrderDTO mapToDTO(Order order) {
-        OrderDTO dto = new OrderDTO();
+        OrderDTO dto = modelMapper.map(order, OrderDTO.class);
 
-        dto.setId(order.getId());
-
-        // User info
-        dto.setUserId(order.getUser().getId());
-        dto.setUserName(order.getUser().getName());
-        dto.setUserEmail(order.getUser().getEmail());
-
-        // Event info
+        // Map event details
         dto.setEventId(order.getEvent().getId());
         dto.setEventTitle(order.getEvent().getTitle());
         dto.setEventDate(order.getEvent().getEventDate());
 
-        dto.setTotalAmount(order.getTotalAmount());
-        dto.setStatus(order.getStatus().name());
-        dto.setOrderDate(order.getOrderDate());
-        dto.setUpdatedAt(order.getUpdatedAt());
+        // Map user details
+        dto.setUserId(order.getUser().getId());
+        dto.setUserName(order.getUser().getName());
+        dto.setUserEmail(order.getUser().getEmail());
+
+        // Map payment status
+        Payment payment = paymentRepository.findByOrder(order).orElse(null);
+        if (payment != null) {
+            dto.setPaymentStatus(payment.getStatus().name());
+        } else {
+            dto.setPaymentStatus("PENDING");
+        }
 
         // Map order items
-        List<OrderItemDTO> orderItemDTOs = order.getOrderItems().stream()
-                .map(this::mapOrderItemToDTO)
-                .collect(Collectors.toList());
-        dto.setOrderItems(orderItemDTOs);
+        List<OrderItemDTO> itemDTOs = order.getOrderItems().stream()
+                .map(item -> {
+                    OrderItemDTO itemDTO = modelMapper.map(item, OrderItemDTO.class);
+                    itemDTO.setOrderId(order.getId());
+                    itemDTO.setEventId(order.getEvent().getId());
+                    itemDTO.setEventName(order.getEvent().getTitle());
+                    itemDTO.setTicketTypeName(item.getTicketType().getName());
+                    return itemDTO;
+                })
+                .toList();
+
+        dto.setOrderItems(itemDTOs);
 
         return dto;
     }
@@ -367,6 +383,65 @@ public class OrderServiceImpl implements OrderService {
         if (event.getEventDate().isBefore(LocalDate.now())) {
             throw new BadRequestException("Cannot book tickets for past event");
         }
+    }
+
+    @Override
+    @Transactional
+    public Response<OrderDTO> refundOrder(Long id) {
+        log.info("Processing refund for order: {}", id);
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        // Validate order can be refunded
+        if (order.getStatus() != OrderStatus.CONFIRMED && order.getStatus() != OrderStatus.COMPLETED) {
+            throw new BadRequestException("Only confirmed/completed orders can be refunded");
+        }
+
+        // Find payment for this order
+        Payment payment = paymentRepository.findByOrder(order)
+                .orElseThrow(() -> new NotFoundException("Payment not found for this order"));
+
+        // Check if already refunded
+        if (payment.getStatus() == PaymentStatus.REFUNDED) {
+            throw new BadRequestException("Order has already been refunded");
+        }
+
+        // Update payment status to REFUNDED
+        payment.setStatus(PaymentStatus.REFUNDED);
+        paymentRepository.save(payment);
+        log.info("Payment {} status updated to REFUNDED", payment.getId());
+
+        // Invalidate all tickets (QR codes won't work)
+        for (OrderItem orderItem : order.getOrderItems()) {
+            orderItem.setIsValid(false);
+
+            // Restore ticket quantities
+            TicketType ticketType = orderItem.getTicketType();
+            ticketType.setQuantityAvailable(
+                    ticketType.getQuantityAvailable() + orderItem.getQuantity()
+            );
+            ticketTypeRepository.save(ticketType);
+
+            log.info("Restored {} tickets for: {}", orderItem.getQuantity(), ticketType.getName());
+        }
+
+        // Update order timestamp
+        order.setUpdatedAt(LocalDateTime.now());
+        Order savedOrder = orderRepository.save(order);
+
+        log.info("Order {} refunded successfully by admin", id);
+
+        // Send refund email
+        notificationService.sendRefundEmail(savedOrder);
+
+        OrderDTO orderDTO = mapToDTO(savedOrder);
+
+        return Response.<OrderDTO>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Order refunded successfully")
+                .data(orderDTO)
+                .build();
     }
 
     /**

@@ -28,6 +28,8 @@ public class OrderDTO {
 
     private BigDecimal totalAmount;
 
+    private String paymentStatus;
+
     private String status;  // OrderStatus as String
 
     // Order items (tickets)

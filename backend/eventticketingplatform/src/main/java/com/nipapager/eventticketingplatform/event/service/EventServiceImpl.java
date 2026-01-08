@@ -10,6 +10,7 @@ import com.nipapager.eventticketingplatform.event.repository.EventRepository;
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.ForbiddenException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.user.entity.User;
 import com.nipapager.eventticketingplatform.user.service.UserService;
@@ -39,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final VenueRepository venueRepository;
     private final UserService userService;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     @Override
     public Response<EventDTO> createEvent(EventDTO eventDTO) {
@@ -71,6 +73,8 @@ public class EventServiceImpl implements EventService {
         // Save event
         Event savedEvent = eventRepository.save(event);
         log.info("Event created successfully with ID: {} (Status: PENDING)", savedEvent.getId());
+
+        notificationService.sendEventCreatedEmail(savedEvent);
 
         // Map to DTO
         EventDTO savedDTO = mapToDTO(savedEvent);
@@ -272,6 +276,8 @@ public class EventServiceImpl implements EventService {
         Event savedEvent = eventRepository.save(event);
 
         log.info("Event approved successfully: {}", id);
+
+        notificationService.sendEventApprovedEmail(savedEvent);
 
         // Map to DTO
         EventDTO eventDTO = mapToDTO(savedEvent);

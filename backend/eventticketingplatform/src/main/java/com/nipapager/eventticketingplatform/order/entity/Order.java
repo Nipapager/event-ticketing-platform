@@ -47,6 +47,8 @@ public class Order {
     @ToString.Exclude
     private List<OrderItem> orderItems;
 
+
+
     @Column(unique = true)
     private String stripeSessionId;
 

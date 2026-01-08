@@ -101,6 +101,7 @@ export interface Order {
   eventDate: string;
   totalAmount: number;
   status: string;
+  paymentStatus: string;
   orderItems: OrderItem[];
   orderDate: string;
   updatedAt?: string;
@@ -116,6 +117,7 @@ export interface OrderItem {
   pricePerTicket: number;
   qrCodeUrl?: string;
   ticketCode?: string;
+  isValid?: boolean;
   createdAt: string;
 }
 

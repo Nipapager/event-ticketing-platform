@@ -10,6 +10,7 @@ import com.nipapager.eventticketingplatform.event.repository.EventRepository;
 import com.nipapager.eventticketingplatform.event.repository.TicketTypeRepository;
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.order.entity.Order;
 import com.nipapager.eventticketingplatform.order.entity.OrderItem;
 import com.nipapager.eventticketingplatform.order.repository.OrderRepository;
@@ -17,6 +18,7 @@ import com.nipapager.eventticketingplatform.payment.dto.CheckoutResponse;
 import com.nipapager.eventticketingplatform.payment.dto.CreateCheckoutRequest;
 import com.nipapager.eventticketingplatform.payment.entity.Payment;
 import com.nipapager.eventticketingplatform.payment.repository.PaymentRepository;
+import com.nipapager.eventticketingplatform.qrcode.service.QRCodeService;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.user.entity.User;
 import com.nipapager.eventticketingplatform.user.service.UserService;
@@ -50,6 +52,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final TicketTypeRepository ticketTypeRepository;
     private final PaymentRepository paymentRepository;
     private final UserService userService;
+    private final NotificationService notificationService;
+    private final QRCodeService qrCodeService;  // ADD THIS
 
     @Value("${stripe.api.key}")
     private String stripeApiKey;
@@ -207,21 +211,30 @@ public class PaymentServiceImpl implements PaymentService {
 
         try {
             com.stripe.model.Event event = Webhook.constructEvent(payload, sigHeader, webhookSecret);
+            log.info("Webhook signature verified. Event type: {}", event.getType());
 
             // Handle checkout.session.completed event
             if ("checkout.session.completed".equals(event.getType())) {
                 Session session = (Session) event.getDataObjectDeserializer().getObject().orElseThrow();
+                log.info("Processing checkout session: {}", session.getId());
+                log.info("Payment status: {}", session.getPaymentStatus());
+                log.info("Session metadata: {}", session.getMetadata());
                 handleCheckoutSessionCompleted(session);
             }
             // Handle checkout.session.expired event
             else if ("checkout.session.expired".equals(event.getType())) {
                 Session session = (Session) event.getDataObjectDeserializer().getObject().orElseThrow();
                 handleCheckoutSessionExpired(session);
+            } else {
+                log.info("Unhandled webhook event type: {}", event.getType());
             }
 
         } catch (SignatureVerificationException e) {
             log.error("Webhook signature verification failed: {}", e.getMessage());
             throw new BadRequestException("Invalid webhook signature");
+        } catch (Exception e) {
+            log.error("Error processing webhook: {}", e.getMessage(), e);
+            throw new BadRequestException("Webhook processing failed: " + e.getMessage());
         }
     }
 
@@ -230,29 +243,85 @@ public class PaymentServiceImpl implements PaymentService {
     private void handleCheckoutSessionCompleted(Session session) {
         log.info("Processing completed checkout session: {}", session.getId());
 
-        String sessionId = session.getId();
-        Order order = orderRepository.findByStripeSessionId(sessionId)
-                .orElseThrow(() -> new NotFoundException("Order not found for session: " + sessionId));
+        try {
+            String sessionId = session.getId();
 
-        // Update order status to CONFIRMED
-        order.setStatus(OrderStatus.CONFIRMED);
-        order.setUpdatedAt(LocalDateTime.now());
-        orderRepository.save(order);
+            log.info("Looking for order with session ID: {}", sessionId);
+            Order order = orderRepository.findByStripeSessionId(sessionId)
+                    .orElseThrow(() -> {
+                        log.error("Order not found for session: {}", sessionId);
+                        return new NotFoundException("Order not found for session: " + sessionId);
+                    });
 
-        // Create payment record
-        Payment payment = Payment.builder()
-                .user(order.getUser())
-                .order(order)
-                .amount(order.getTotalAmount())
-                .status(PaymentStatus.COMPLETED)
-                .transactionId(session.getPaymentIntent())
-                .paymentMethod(PaymentMethod.CREDIT_CARD)
-                .paymentDate(LocalDateTime.now())
-                .build();
+            log.info("Found order: {} (Status: {})", order.getId(), order.getStatus());
 
-        paymentRepository.save(payment);
+            if (order.getStatus() != OrderStatus.PENDING) {
+                log.warn("Order {} already processed (Status: {})", order.getId(), order.getStatus());
+                return;
+            }
 
-        log.info("Order {} confirmed via Stripe payment", order.getId());
+            // Update order status to CONFIRMED
+            order.setStatus(OrderStatus.CONFIRMED);
+            order.setUpdatedAt(LocalDateTime.now());
+            log.info("Order {} status updated to CONFIRMED", order.getId());
+
+            // Generate QR codes for tickets
+            log.info("Generating QR codes for {} order items", order.getOrderItems().size());
+            for (OrderItem orderItem : order.getOrderItems()) {
+                // Generate unique ticket code
+                String ticketCode = qrCodeService.generateTicketCode(order.getId(), orderItem.getId());
+
+                // Generate QR code with ticket information
+                String qrData = String.format(
+                        "TICKET:%s|EVENT:%s|USER:%s|DATE:%s|VENUE:%s",
+                        ticketCode,
+                        order.getEvent().getTitle(),
+                        order.getUser().getEmail(),
+                        order.getEvent().getEventDate(),
+                        order.getEvent().getVenue().getName()
+                );
+
+                String qrCodeBase64 = qrCodeService.generateQRCodeBase64(qrData);
+
+                // Update order item
+                orderItem.setTicketCode(ticketCode);
+                orderItem.setQrCodeUrl(qrCodeBase64);
+                orderItem.setIsValid(true);
+
+                log.info("Generated QR code for ticket: {} (Item ID: {})", ticketCode, orderItem.getId());
+            }
+
+            orderRepository.save(order);
+            log.info("Order {} saved with QR codes", order.getId());
+
+            // Create payment record
+            Payment payment = Payment.builder()
+                    .user(order.getUser())
+                    .order(order)
+                    .amount(order.getTotalAmount())
+                    .status(PaymentStatus.COMPLETED)
+                    .transactionId(session.getPaymentIntent())
+                    .paymentMethod(PaymentMethod.CREDIT_CARD)
+                    .paymentDate(LocalDateTime.now())
+                    .build();
+
+            paymentRepository.save(payment);
+            log.info("Payment record created for order {}", order.getId());
+
+            // Send ticket purchase email (with QR codes)
+            try {
+                notificationService.sendTicketPurchaseEmail(order);
+                log.info("Confirmation email sent to: {}", order.getUser().getEmail());
+            } catch (Exception e) {
+                log.error("Failed to send confirmation email: {}", e.getMessage());
+            }
+
+            log.info("Order {} confirmed successfully via Stripe payment", order.getId());
+
+        } catch (Exception e) {
+            log.error("Error in handleCheckoutSessionCompleted: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void handleCheckoutSessionExpired(Session session) {

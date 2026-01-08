@@ -10,9 +10,9 @@ const MyTicketsPage = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedQR, setSelectedQR] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check authentication
     if (!authService.isAuthenticated()) {
       navigate('/login');
       return;
@@ -133,35 +133,71 @@ const MyTicketsPage = () => {
                     </div>
                   </div>
 
-                  {/* Order Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-
-                    {/* Left: Tickets */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Tickets</h4>
-                      <div className="space-y-2">
-                        {order.orderItems.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-700">
+                  {/* Tickets with QR Codes */}
+                  <div className="space-y-4 mb-4">
+                    {order.orderItems.map((item) => (
+                      <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                          
+                          {/* Ticket Info */}
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-800 mb-1">
                               {item.quantity}x {item.ticketTypeName}
-                            </span>
-                            <span className="font-semibold text-gray-800">
-                              €{(item.pricePerTicket * item.quantity).toFixed(2)}
-                            </span>
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-1">
+                              €{item.pricePerTicket.toFixed(2)} each
+                            </p>
+                            {item.ticketCode && (
+                              <p className="text-xs text-gray-500 font-mono">
+                                Code: {item.ticketCode}
+                              </p>
+                            )}
+                            {item.isValid === false && (
+                              <p className="text-xs text-red-600 font-semibold mt-1">
+                                ⚠️ Invalid (Refunded)
+                              </p>
+                            )}
                           </div>
-                        ))}
-                      </div>
-                    </div>
 
-                    {/* Right: Order Info */}
-                    <div>
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">Order Details</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex justify-between">
+                          {/* QR Code */}
+                          {item.qrCodeUrl && item.isValid !== false ? (
+                            <div className="flex items-center gap-3">
+                              <div 
+                                className="cursor-pointer hover:opacity-75 transition-opacity"
+                                onClick={() => setSelectedQR(item.qrCodeUrl!)}
+                              >
+                                <img 
+                                  src={item.qrCodeUrl} 
+                                  alt="QR Code" 
+                                  className="w-20 h-20 border-2 border-gray-300 rounded-lg"
+                                />
+                              </div>
+                              <button
+                                onClick={() => setSelectedQR(item.qrCodeUrl!)}
+                                className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+                              >
+                                View
+                              </button>
+                            </div>
+                          ) : order.status === 'CONFIRMED' ? (
+                            <div className="text-sm text-gray-500 italic">
+                              QR code generating...
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Order Details */}
+                  <div className="border-t pt-4">
+                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                      <div className="text-sm space-y-1">
+                        <div className="flex gap-2">
                           <span className="text-gray-600">Order ID:</span>
                           <span className="font-semibold text-gray-800">#{order.id}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex gap-2">
                           <span className="text-gray-600">Order Date:</span>
                           <span className="text-gray-800">
                             {new Date(order.orderDate).toLocaleDateString('en-US', {
@@ -171,35 +207,15 @@ const MyTicketsPage = () => {
                             })}
                           </span>
                         </div>
-                        <div className="flex justify-between pt-2 border-t">
-                          <span className="font-semibold text-gray-700">Total:</span>
-                          <span className="font-bold text-gray-800">
-                            €{order.totalAmount.toFixed(2)}
-                          </span>
-                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600 mb-1">Total Paid</p>
+                        <p className="text-2xl font-bold text-gray-800">
+                          €{order.totalAmount.toFixed(2)}
+                        </p>
                       </div>
                     </div>
                   </div>
-
-                  {/* QR Code Placeholder (for confirmed orders) */}
-                  {order.status === 'CONFIRMED' && (
-                    <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-16 h-16 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center">
-                          <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">QR Code</p>
-                          <p className="text-sm text-gray-600">Show at venue entrance</p>
-                        </div>
-                      </div>
-                      <button className="text-blue-600 hover:text-blue-700 font-semibold text-sm">
-                        View
-                      </button>
-                    </div>
-                  )}
 
                   {/* Action Buttons */}
                   <div className="mt-4 flex gap-3">
@@ -209,16 +225,51 @@ const MyTicketsPage = () => {
                     >
                       View Event
                     </button>
-
-                    {order.status === 'CONFIRMED' && (
-                      <button className="flex-1 md:flex-none bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                        Download Tickets
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* QR Code Modal */}
+        {selectedQR && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            onClick={() => setSelectedQR(null)}
+          >
+            <div 
+              className="bg-white rounded-lg p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-gray-800">Your Ticket QR Code</h3>
+                <button
+                  onClick={() => setSelectedQR(null)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex justify-center mb-4">
+                <img 
+                  src={selectedQR} 
+                  alt="QR Code" 
+                  className="w-64 h-64 border-4 border-gray-300 rounded-lg"
+                />
+              </div>
+              <p className="text-center text-sm text-gray-600 mb-4">
+                Show this QR code at the venue entrance
+              </p>
+              <button
+                onClick={() => setSelectedQR(null)}
+                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Close
+              </button>
+            </div>
           </div>
         )}
       </div>

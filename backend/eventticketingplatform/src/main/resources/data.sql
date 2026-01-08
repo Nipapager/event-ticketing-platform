@@ -3,9 +3,10 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 -- Clear existing data
 DELETE FROM reviews;
-DELETE FROM ticket_types;
+DELETE FROM payments;
 DELETE FROM order_items;
 DELETE FROM orders;
+DELETE FROM ticket_types;
 DELETE FROM events;
 DELETE FROM venues;
 DELETE FROM categories;
@@ -80,7 +81,7 @@ INSERT INTO users_roles (user_id, role_id) VALUES
 -- Admins
 (16, 3), (17, 3), (18, 3);
 
--- Insert PAST Events (dates in the past for testing reviews)
+-- Insert PAST Events
 INSERT INTO events (id, title, description, event_date, event_time, category_id, venue_id, organizer_id, status, image_url) VALUES
 (1, 'New Year Rock Concert 2025', 'Amazing rock concert to celebrate the new year', '2025-01-01', '22:00:00', 1, 1, 11, 'APPROVED', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800'),
 (2, 'Winter Jazz Festival', 'Smooth jazz performances by top Greek artists', '2025-12-15', '20:00:00', 1, 5, 11, 'APPROVED', 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800'),
@@ -93,7 +94,7 @@ INSERT INTO events (id, title, description, event_date, event_time, category_id,
 (9, 'Spring Concert 2025', 'Classical music concert', '2025-05-20', '20:00:00', 3, 1, 11, 'APPROVED', 'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=800'),
 (10, 'Beach Party Mykonos', 'Summer beach party', '2025-07-10', '22:00:00', 5, 7, 14, 'APPROVED', 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800');
 
--- Insert UPCOMING Events (future dates)
+-- Insert UPCOMING Events
 INSERT INTO events (id, title, description, event_date, event_time, category_id, venue_id, organizer_id, status, image_url) VALUES
 (11, 'Summer DJ Set - Electro Night', 'Electronic music night with top Greek DJs', '2026-01-15', '23:00:00', 1, 3, 11, 'APPROVED', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800'),
 (12, 'Rembetika Live - Vassilis Tsitsanis Tribute', 'Traditional Greek rembetika music', '2026-01-20', '21:00:00', 1, 1, 11, 'APPROVED', 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800'),
@@ -110,153 +111,125 @@ INSERT INTO events (id, title, description, event_date, event_time, category_id,
 
 -- Ticket Types for PAST Events (1-10)
 INSERT INTO ticket_types (id, event_id, name, price, total_quantity, quantity_available) VALUES
--- Event 1
 (1, 1, 'General Admission', 25.00, 500, 50),
 (2, 1, 'VIP', 50.00, 100, 10),
--- Event 2
 (3, 2, 'General Admission', 30.00, 800, 100),
 (4, 2, 'VIP', 60.00, 200, 50),
--- Event 3
 (5, 3, 'Regular', 20.00, 500, 50),
 (6, 3, 'Student', 12.00, 200, 20),
--- Event 4
 (7, 4, 'Standard', 80.00, 1000, 100),
 (8, 4, 'Premium', 150.00, 200, 20),
--- Event 5
 (9, 5, 'General Admission', 15.00, 100, 0),
--- Event 6
 (10, 6, 'Day Pass', 50.00, 2000, 200),
 (11, 6, '3-Day Pass', 120.00, 1000, 100),
--- Event 7
 (12, 7, 'Regular', 25.00, 600, 50),
 (13, 7, 'Student', 15.00, 200, 20),
--- Event 8
 (14, 8, 'Normal Seat', 30.00, 80000, 10000),
 (15, 8, 'Premium Seat', 90.00, 20000, 2000),
--- Event 9
 (16, 9, 'General Admission', 35.00, 800, 100),
 (17, 9, 'VIP', 70.00, 200, 50),
--- Event 10
 (18, 10, 'General Entry', 40.00, 500, 50);
 
 -- Ticket Types for UPCOMING Events (11-22)
 INSERT INTO ticket_types (id, event_id, name, price, total_quantity, quantity_available) VALUES
--- Event 11
 (19, 11, 'General Admission', 15.00, 100, 100),
--- Event 12
 (20, 12, 'General Admission', 30.00, 600, 600),
 (21, 12, 'VIP', 60.00, 150, 150),
 (22, 12, 'Early Bird', 22.00, 250, 250),
--- Event 13
 (23, 13, 'General Admission', 35.00, 700, 700),
 (24, 13, 'Early Bird', 25.00, 300, 300),
--- Event 14
 (25, 14, 'Normal Seat', 25.00, 80000, 80000),
 (26, 14, 'Premium Seat', 80.00, 20000, 20000),
--- Event 15
 (27, 15, 'Normal Seat', 30.00, 75000, 75000),
 (28, 15, 'Premium Seat', 90.00, 25000, 25000),
--- Event 16
 (29, 16, 'Early Bird', 18.00, 200, 200),
 (30, 16, 'Regular', 25.00, 500, 500),
 (31, 16, 'Reduced', 12.00, 250, 250),
--- Event 17
 (32, 17, 'Early Bird', 15.00, 200, 200),
 (33, 17, 'Regular', 20.00, 500, 500),
--- Event 18
 (34, 18, 'General Admission', 12.00, 100, 100),
--- Event 19
 (35, 19, 'Standard', 100.00, 1500, 1500),
 (36, 19, 'VIP', 250.00, 300, 300),
--- Event 20
 (37, 20, 'General Entry', 40.00, 500, 500),
--- Event 21
 (38, 21, 'Regular', 35.00, 800, 800),
 (39, 21, 'Student', 20.00, 200, 200),
--- Event 22
 (40, 22, 'General', 10.00, 150, 150);
 
--- Insert PAST Orders (for users to have attended events)
+-- Insert PAST Orders
 INSERT INTO orders (id, user_id, event_id, total_amount, status, order_date) VALUES
--- User 1 attended 6 past events
-(1, 1, 1, 75.00, 'COMPLETED', '2024-12-28 10:00:00'),
-(2, 1, 2, 90.00, 'COMPLETED', '2025-12-10 14:00:00'),
-(3, 1, 3, 32.00, 'COMPLETED', '2025-12-15 16:00:00'),
-(4, 1, 5, 45.00, 'COMPLETED', '2025-10-25 12:00:00'),
-(5, 1, 6, 120.00, 'COMPLETED', '2025-08-10 11:00:00'),
-(6, 1, 9, 105.00, 'COMPLETED', '2025-05-15 10:00:00'),
+(1, 1, 1, 75.00, 'CONFIRMED', '2024-12-28 10:00:00'),
+(2, 1, 2, 90.00, 'CONFIRMED', '2025-12-10 14:00:00'),
+(3, 1, 3, 32.00, 'CONFIRMED', '2025-12-15 16:00:00'),
+(4, 1, 5, 45.00, 'CONFIRMED', '2025-10-25 12:00:00'),
+(5, 1, 6, 120.00, 'CONFIRMED', '2025-08-10 11:00:00'),
+(6, 1, 9, 105.00, 'CONFIRMED', '2025-05-15 10:00:00'),
+(7, 2, 1, 50.00, 'CONFIRMED', '2024-12-29 09:00:00'),
+(8, 2, 3, 40.00, 'CONFIRMED', '2025-12-18 15:00:00'),
+(9, 2, 4, 230.00, 'CONFIRMED', '2025-11-05 10:00:00'),
+(10, 2, 7, 40.00, 'CONFIRMED', '2025-09-15 13:00:00'),
+(11, 2, 10, 80.00, 'CONFIRMED', '2025-07-08 11:00:00'),
+(12, 3, 2, 120.00, 'CONFIRMED', '2025-12-12 11:00:00'),
+(13, 3, 5, 30.00, 'CONFIRMED', '2025-10-28 14:00:00'),
+(14, 3, 8, 120.00, 'CONFIRMED', '2025-11-28 16:00:00'),
+(15, 3, 9, 70.00, 'CONFIRMED', '2025-05-18 12:00:00'),
+(16, 4, 6, 240.00, 'CONFIRMED', '2025-08-12 10:00:00'),
+(17, 4, 7, 50.00, 'CONFIRMED', '2025-09-18 12:00:00'),
+(18, 4, 10, 80.00, 'CONFIRMED', '2025-07-09 14:00:00'),
+(19, 5, 1, 100.00, 'CONFIRMED', '2024-12-30 10:00:00'),
+(20, 5, 4, 160.00, 'CONFIRMED', '2025-11-08 15:00:00');
 
--- User 2 attended 5 past events
-(7, 2, 1, 50.00, 'COMPLETED', '2024-12-29 09:00:00'),
-(8, 2, 3, 40.00, 'COMPLETED', '2025-12-18 15:00:00'),
-(9, 2, 4, 230.00, 'COMPLETED', '2025-11-05 10:00:00'),
-(10, 2, 7, 40.00, 'COMPLETED', '2025-09-15 13:00:00'),
-(11, 2, 10, 80.00, 'COMPLETED', '2025-07-08 11:00:00'),
+-- Insert Payments for existing orders
+INSERT INTO payments (id, user_id, order_id, amount, status, payment_method, transaction_id, payment_date) VALUES
+(1, 1, 1, 75.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_001', '2024-12-28 10:05:00'),
+(2, 1, 2, 90.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_002', '2025-12-10 14:05:00'),
+(3, 1, 3, 32.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_003', '2025-12-15 16:05:00'),
+(4, 1, 4, 45.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_004', '2025-10-25 12:05:00'),
+(5, 1, 5, 120.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_005', '2025-08-10 11:05:00'),
+(6, 1, 6, 105.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_006', '2025-05-15 10:05:00'),
+(7, 2, 7, 50.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_007', '2024-12-29 09:05:00'),
+(8, 2, 8, 40.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_008', '2025-12-18 15:05:00'),
+(9, 2, 9, 230.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_009', '2025-11-05 10:05:00'),
+(10, 2, 10, 40.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_010', '2025-09-15 13:05:00'),
+(11, 2, 11, 80.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_011', '2025-07-08 11:05:00'),
+(12, 3, 12, 120.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_012', '2025-12-12 11:05:00'),
+(13, 3, 13, 30.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_013', '2025-10-28 14:05:00'),
+(14, 3, 14, 120.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_014', '2025-11-28 16:05:00'),
+(15, 3, 15, 70.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_015', '2025-05-18 12:05:00'),
+(16, 4, 16, 240.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_016', '2025-08-12 10:05:00'),
+(17, 4, 17, 50.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_017', '2025-09-18 12:05:00'),
+(18, 4, 18, 80.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_018', '2025-07-09 14:05:00'),
+(19, 5, 19, 100.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_019', '2024-12-30 10:05:00'),
+(20, 5, 20, 160.00, 'COMPLETED', 'CREDIT_CARD', 'pi_test_020', '2025-11-08 15:05:00');
 
--- User 3 attended 4 past events
-(12, 3, 2, 120.00, 'COMPLETED', '2025-12-12 11:00:00'),
-(13, 3, 5, 30.00, 'COMPLETED', '2025-10-28 14:00:00'),
-(14, 3, 8, 120.00, 'COMPLETED', '2025-11-28 16:00:00'),
-(15, 3, 9, 70.00, 'COMPLETED', '2025-05-18 12:00:00'),
+-- Order Items
+INSERT INTO order_items (id, order_id, ticket_type_id, quantity, price_per_ticket, is_valid) VALUES
+(1, 1, 1, 2, 25.00, TRUE),
+(2, 1, 2, 1, 50.00, TRUE),
+(3, 2, 3, 3, 30.00, TRUE),
+(4, 3, 5, 1, 20.00, TRUE),
+(5, 3, 6, 1, 12.00, TRUE),
+(6, 4, 9, 3, 15.00, TRUE),
+(7, 5, 11, 1, 120.00, TRUE),
+(8, 6, 16, 2, 35.00, TRUE),
+(9, 6, 17, 1, 70.00, TRUE),
+(10, 7, 2, 1, 50.00, TRUE),
+(11, 8, 5, 2, 20.00, TRUE),
+(12, 9, 7, 1, 80.00, TRUE),
+(13, 9, 8, 1, 150.00, TRUE),
+(14, 10, 12, 1, 25.00, TRUE),
+(15, 10, 13, 1, 15.00, TRUE),
+(16, 11, 18, 2, 40.00, TRUE),
+(17, 12, 4, 2, 60.00, TRUE),
+(18, 13, 9, 2, 15.00, TRUE),
+(19, 14, 14, 4, 30.00, TRUE),
+(20, 15, 16, 2, 35.00, TRUE),
+(21, 16, 11, 2, 120.00, TRUE),
+(22, 17, 12, 2, 25.00, TRUE),
+(23, 18, 18, 2, 40.00, TRUE),
+(24, 19, 2, 2, 50.00, TRUE),
+(25, 20, 7, 2, 80.00, TRUE);
 
--- User 4 attended 3 past events
-(16, 4, 6, 240.00, 'COMPLETED', '2025-08-12 10:00:00'),
-(17, 4, 7, 50.00, 'COMPLETED', '2025-09-18 12:00:00'),
-(18, 4, 10, 80.00, 'COMPLETED', '2025-07-09 14:00:00'),
-
--- User 5 attended 2 past events
-(19, 5, 1, 100.00, 'COMPLETED', '2024-12-30 10:00:00'),
-(20, 5, 4, 160.00, 'COMPLETED', '2025-11-08 15:00:00');
-
--- Order Items for the past orders
-INSERT INTO order_items (id, order_id, ticket_type_id, quantity, price_per_ticket) VALUES
--- Order 1 (User 1 - Event 1)
-(1, 1, 1, 2, 25.00),
-(2, 1, 2, 1, 50.00),
--- Order 2 (User 1 - Event 2)
-(3, 2, 3, 3, 30.00),
--- Order 3 (User 1 - Event 3)
-(4, 3, 5, 1, 20.00),
-(5, 3, 6, 1, 12.00),
--- Order 4 (User 1 - Event 5)
-(6, 4, 9, 3, 15.00),
--- Order 5 (User 1 - Event 6)
-(7, 5, 11, 1, 120.00),
--- Order 6 (User 1 - Event 9)
-(8, 6, 16, 2, 35.00),
-(9, 6, 17, 1, 70.00),
--- Order 7 (User 2 - Event 1)
-(10, 7, 2, 1, 50.00),
--- Order 8 (User 2 - Event 3)
-(11, 8, 5, 2, 20.00),
--- Order 9 (User 2 - Event 4)
-(12, 9, 7, 1, 80.00),
-(13, 9, 8, 1, 150.00),
--- Order 10 (User 2 - Event 7)
-(14, 10, 12, 1, 25.00),
-(15, 10, 13, 1, 15.00),
--- Order 11 (User 2 - Event 10)
-(16, 11, 18, 2, 40.00),
--- Order 12 (User 3 - Event 2)
-(17, 12, 4, 2, 60.00),
--- Order 13 (User 3 - Event 5)
-(18, 13, 9, 2, 15.00),
--- Order 14 (User 3 - Event 8)
-(19, 14, 14, 4, 30.00),
--- Order 15 (User 3 - Event 9)
-(20, 15, 16, 2, 35.00),
--- Order 16 (User 4 - Event 6)
-(21, 16, 11, 2, 120.00),
--- Order 17 (User 4 - Event 7)
-(22, 17, 12, 2, 25.00),
--- Order 18 (User 4 - Event 10)
-(23, 18, 18, 2, 40.00),
--- Order 19 (User 5 - Event 1)
-(24, 19, 2, 2, 50.00),
--- Order 20 (User 5 - Event 4)
-(25, 20, 7, 2, 80.00);
-
--- Insert some Reviews for past events
+-- Insert Reviews
 INSERT INTO reviews (id, user_id, event_id, rating, comment, created_at, updated_at) VALUES
 (1, 1, 1, 5, 'Amazing concert! The energy was incredible!', '2025-01-02 10:00:00', '2025-01-02 10:00:00'),
 (2, 1, 2, 4, 'Great jazz performances, really enjoyed it.', '2025-12-16 14:00:00', '2025-12-16 14:00:00'),
@@ -274,5 +247,6 @@ ALTER TABLE users AUTO_INCREMENT = 19;
 ALTER TABLE events AUTO_INCREMENT = 23;
 ALTER TABLE ticket_types AUTO_INCREMENT = 41;
 ALTER TABLE orders AUTO_INCREMENT = 21;
+ALTER TABLE payments AUTO_INCREMENT = 21;
 ALTER TABLE order_items AUTO_INCREMENT = 26;
-ALTER TABLE reviews AUTO_INCREMENT = 8;
+ALTER TABLE reviews AUTO_INCREMENT = 8

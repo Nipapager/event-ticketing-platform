@@ -60,22 +60,33 @@ const Navbar = () => {
                   </Link>
                 )}
 
-                {/* Admin Links */}
+                {/* Admin Dropdown */}
                 {user?.roles?.includes('ROLE_ADMIN') && (
-                  <>
-                    <Link
-                      to="/admin/event-manager"
-                      className="text-gray-700 hover:text-blue-600 font-medium"
-                    >
-                      Event Manager
-                    </Link>
-                    <Link
-                      to="/admin/user-manager"
-                      className="text-gray-700 hover:text-blue-600 font-medium"
-                    >
-                      User Manager
-                    </Link>
-                  </>
+                  <div className="relative group">
+                    <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-medium px-3 py-2 rounded-lg hover:bg-gray-50">
+                      <span>Admin</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    <div className="absolute right-0 top-full pt-2 w-56 hidden group-hover:block z-10">
+                      <div className="bg-white rounded-lg shadow-lg py-2 border border-gray-200">
+                        <Link to="/admin/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                          <div className="font-medium">Order Manager</div>
+                          <div className="text-xs text-gray-500">Manage and refund orders</div>
+                        </Link>
+                        <Link to="/admin/event-manager" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                          <div className="font-medium">Event Manager</div>
+                          <div className="text-xs text-gray-500">Approve and manage events</div>
+                        </Link>
+                        <Link to="/admin/user-manager" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
+                          <div className="font-medium">User Manager</div>
+                          <div className="text-xs text-gray-500">Manage user accounts</div>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {/* Organizer/Admin Links */}
@@ -256,6 +267,16 @@ const Navbar = () => {
                     {/* Admin Links */}
                     {user?.roles?.includes('ROLE_ADMIN') && (
                       <>
+                        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Admin Management
+                        </div>
+                        <Link
+                          to="/admin/orders"
+                          onClick={closeMobileMenu}
+                          className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+                        >
+                          Order Manager
+                        </Link>
                         <Link
                           to="/admin/event-manager"
                           onClick={closeMobileMenu}
@@ -276,6 +297,7 @@ const Navbar = () => {
                     {/* Organizer Links */}
                     {(user?.roles?.includes('ROLE_ORGANIZER') || user?.roles?.includes('ROLE_ADMIN')) && (
                       <>
+                        <div className="border-t my-2"></div>
                         <Link
                           to="/my-events"
                           onClick={closeMobileMenu}
@@ -292,6 +314,8 @@ const Navbar = () => {
                         </Link>
                       </>
                     )}
+
+                    <div className="border-t my-2"></div>
 
                     <Link
                       to="/profile"

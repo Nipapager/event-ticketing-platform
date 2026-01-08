@@ -26,4 +26,6 @@ public interface OrderService {
 
     // Admin: Get orders by event
     Response<List<OrderDTO>> getOrdersByEventId(Long eventId);
+
+    Response<OrderDTO> refundOrder(Long id);
 }

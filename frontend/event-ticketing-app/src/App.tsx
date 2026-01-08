@@ -20,6 +20,7 @@ import EventManagerPage from './pages/EventManagerPage';
 import PastEventsPage from './pages/PastEventsPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
+import AdminOrdersPage from './pages/AdminOrdersPage';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
               <Route path="/past-events" element={<PastEventsPage />} />
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
               <Route path="/payment-cancel" element={<PaymentCancelPage />} />
+              <Route path="/admin/orders" element={<AdminOrdersPage />} />
             </Routes>
           </main>
           <Footer />

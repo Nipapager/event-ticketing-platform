@@ -40,15 +40,22 @@ public class OrderItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerTicket;  // Price at time of purchase
 
-    private String qrCodeUrl;  // Generated after payment completion
+    @Column(columnDefinition = "TEXT")
+    private String qrCodeUrl;  // Base64 encoded QR code - Generated after payment completion
 
     @Column(unique = true)
     private String ticketCode;  // Unique code generated after payment
+
+    @Column(nullable = false)
+    private Boolean isValid = true;  // For refund/cancellation - tickets can be invalidated
 
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (isValid == null) {
+            isValid = true;
+        }
     }
 }

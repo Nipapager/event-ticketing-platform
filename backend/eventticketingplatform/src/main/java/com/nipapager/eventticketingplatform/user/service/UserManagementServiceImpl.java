@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.user.service;
 import com.nipapager.eventticketingplatform.enums.UserRole;
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.role.entity.Role;
 import com.nipapager.eventticketingplatform.role.repository.RoleRepository;
@@ -28,6 +29,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private final RoleRepository roleRepository;
     private final ModelMapper modelMapper;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @Override
     public Response<List<UserDTO>> getAllUsers() {
@@ -72,6 +74,8 @@ public class UserManagementServiceImpl implements UserManagementService {
         User updatedUser = userRepository.save(user);
 
         log.info("User {} promoted to organizer successfully", userId);
+
+        notificationService.sendOrganizerUpgradeEmail(user);
 
         UserDTO userDTO = mapToDTO(updatedUser);
 
