@@ -247,10 +247,62 @@ const EventDetailsPage = () => {
                   </div>
                 </div>
 
-                
-            
+
+
               </div>
             </div>
+
+            {/* Ticket Information Section */}
+            {event.ticketTypes && event.ticketTypes.length > 0 && (
+              <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Available Tickets</h2>
+                <div className="space-y-4">
+                  {event.ticketTypes.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-800">
+                            {ticket.name}
+                          </h3>
+                          <p className="text-2xl font-bold text-blue-600 mt-1">
+                            €{ticket.price.toFixed(2)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          {ticket.quantityAvailable > 0 ? (
+                            <span className="inline-block px-3 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                              {ticket.quantityAvailable} available
+                            </span>
+                          ) : (
+                            <span className="inline-block px-3 py-1 bg-red-100 text-red-700 text-sm font-medium rounded-full">
+                              Sold Out
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Ticket Description */}
+                      {ticket.description && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
+                            {ticket.description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    💡 <strong>Note:</strong> Select your ticket type from the booking panel to proceed with your purchase.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Organizer section */}
             <div className="bg-white rounded-lg shadow-md p-6">

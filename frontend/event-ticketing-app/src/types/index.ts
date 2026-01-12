@@ -64,6 +64,7 @@ export interface TicketType {
   price: number;
   totalQuantity: number;
   quantityAvailable: number;
+  description: string;
   createdAt?: string;
   updatedAt?: string;
 }

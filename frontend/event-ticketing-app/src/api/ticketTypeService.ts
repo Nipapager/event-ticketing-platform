@@ -18,6 +18,7 @@ const ticketTypeService = {
     name: string;
     price: number;
     totalQuantity: number;
+    description: string;
   }): Promise<TicketType> => {
     const response = await api.post(`/ticket-types/event/${eventId}`, ticketData);
     return response.data.data;
@@ -34,6 +35,7 @@ const ticketTypeService = {
     name?: string;
     price?: number;
     quantityAvailable?: number;
+    description: string;
   }): Promise<TicketType> => {
     const response = await api.put(`/ticket-types/${id}`, ticketData);
     return response.data.data;

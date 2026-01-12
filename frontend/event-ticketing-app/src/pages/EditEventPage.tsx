@@ -14,6 +14,7 @@ interface TicketType {
   name: string;
   price: string;
   quantityAvailable: string;
+  description: string;
 }
 
 const EditEventPage = () => {
@@ -96,7 +97,8 @@ const EditEventPage = () => {
             id: ticket.id,
             name: ticket.name,
             price: ticket.price.toString(),
-            quantityAvailable: ticket.quantityAvailable.toString()
+            quantityAvailable: ticket.quantityAvailable.toString(),
+            description: ticket.description || ''
           }))
         );
       }
@@ -126,7 +128,7 @@ const EditEventPage = () => {
   };
 
   const addTicketType = () => {
-    setTicketTypes([...ticketTypes, { name: '', price: '', quantityAvailable: '' }]);
+    setTicketTypes([...ticketTypes, { name: '', price: '', quantityAvailable: '', description: '' }]);
   };
 
   const removeTicketType = async (index: number) => {
@@ -164,6 +166,7 @@ const EditEventPage = () => {
       if (!ticket.price || parseFloat(ticket.price) <= 0) newErrors[`ticket_${index}_price`] = 'Valid price required';
       if (!ticket.quantityAvailable || parseInt(ticket.quantityAvailable) <= 0)
         newErrors[`ticket_${index}_quantity`] = 'Valid quantity required';
+      if (!ticket.description.trim()) newErrors[`ticket_${index}_description`] = 'Description required';
     });
 
     setErrors(newErrors);
@@ -194,14 +197,16 @@ const EditEventPage = () => {
             return ticketTypeService.updateTicketType(ticket.id, {
               name: ticket.name,
               price: parseFloat(ticket.price),
-              quantityAvailable: parseInt(ticket.quantityAvailable)
+              quantityAvailable: parseInt(ticket.quantityAvailable),
+              description: ticket.description
             });
           } else {
             // Create new ticket
             return ticketTypeService.createTicketType(Number(id), {
               name: ticket.name,
               price: parseFloat(ticket.price),
-              totalQuantity: parseInt(ticket.quantityAvailable)
+              totalQuantity: parseInt(ticket.quantityAvailable),
+              description: ticket.description
             });
           }
         })
@@ -392,7 +397,7 @@ const EditEventPage = () => {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Name *
@@ -402,7 +407,7 @@ const EditEventPage = () => {
                         value={ticket.name}
                         onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., VIP, General"
+                        placeholder="e.g., VIP, General, Early Bird"
                       />
                       {errors[`ticket_${index}_name`] && (
                         <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_name`]}</p>
@@ -443,6 +448,26 @@ const EditEventPage = () => {
                         <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_quantity`]}</p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Description Field - FULL WIDTH*/}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description *
+                    </label>
+                    <textarea
+                      value={ticket.description}
+                      onChange={(e) => handleTicketTypeChange(index, 'description', e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Early bird discount for first 100 tickets, Student ticket - ID required at entrance, etc."
+                    />
+                    {errors[`ticket_${index}_description`] && (
+                      <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_description`]}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Explain what this ticket includes, any restrictions, or special conditions
+                    </p>
                   </div>
                 </div>
               ))}

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public Response<TicketTypeDTO> createTicketType(Long eventId, TicketTypeDTO ticketTypeDTO) {
         log.info("Creating ticket type: {} for event: {}", ticketTypeDTO.getName(), eventId);
 
@@ -53,14 +55,21 @@ public class TicketTypeServiceImpl implements TicketTypeService {
             throw new BadRequestException("Ticket type with name '" + ticketTypeDTO.getName() + "' already exists for this event");
         }
 
-        // Map DTO to entity
-        TicketType ticketType = modelMapper.map(ticketTypeDTO, TicketType.class);
+        // Create ticket type entity
+        TicketType ticketType = new TicketType();
         ticketType.setEvent(event);
+        ticketType.setName(ticketTypeDTO.getName());
+        ticketType.setPrice(ticketTypeDTO.getPrice());
+        ticketType.setTotalQuantity(ticketTypeDTO.getTotalQuantity());
+        ticketType.setQuantityAvailable(ticketTypeDTO.getTotalQuantity());
+        ticketType.setDescription(ticketTypeDTO.getDescription());  // ✅ ADDED
         ticketType.setCreatedAt(LocalDateTime.now());
 
         // Save ticket type
         TicketType savedTicketType = ticketTypeRepository.save(ticketType);
-        log.info("Ticket type created successfully with ID: {}", savedTicketType.getId());
+        log.info("Ticket type created successfully with ID: {} (description: {})",
+                savedTicketType.getId(),
+                savedTicketType.getDescription() != null ? "Yes" : "No");
 
         // Map to DTO
         TicketTypeDTO savedDTO = mapToDTO(savedTicketType);
@@ -115,6 +124,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
     }
 
     @Override
+    @Transactional
     public Response<TicketTypeDTO> updateTicketType(Long id, TicketTypeDTO ticketTypeDTO) {
         log.info("Updating ticket type with id: {}", id);
 
@@ -152,6 +162,12 @@ public class TicketTypeServiceImpl implements TicketTypeService {
             ticketType.setQuantityAvailable(ticketTypeDTO.getQuantityAvailable());
         }
 
+        // Update description if provided  ✅ ADDED
+        if (ticketTypeDTO.getDescription() != null) {
+            ticketType.setDescription(ticketTypeDTO.getDescription());
+            log.info("Updated description for ticket type {}: {}", id, ticketTypeDTO.getDescription());
+        }
+
         ticketType.setUpdatedAt(LocalDateTime.now());
 
         // Save updated ticket type
@@ -169,6 +185,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
     }
 
     @Override
+    @Transactional
     public Response<Void> deleteTicketType(Long id) {
         log.info("Deleting ticket type with id: {}", id);
 
@@ -204,6 +221,12 @@ public class TicketTypeServiceImpl implements TicketTypeService {
         TicketTypeDTO dto = modelMapper.map(ticketType, TicketTypeDTO.class);
         dto.setEventId(ticketType.getEvent().getId());
         dto.setEventName(ticketType.getEvent().getTitle());
+
+        // Ensure description is never null - return empty string instead  ✅ ADDED
+        if (dto.getDescription() == null) {
+            dto.setDescription("");
+        }
+
         return dto;
     }
 

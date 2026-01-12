@@ -130,30 +130,30 @@ INSERT INTO ticket_types (id, event_id, name, price, total_quantity, quantity_av
 (17, 9, 'VIP', 70.00, 200, 50),
 (18, 10, 'General Entry', 40.00, 500, 50);
 
--- Ticket Types for UPCOMING Events (11-22)
-INSERT INTO ticket_types (id, event_id, name, price, total_quantity, quantity_available) VALUES
-(19, 11, 'General Admission', 15.00, 100, 100),
-(20, 12, 'General Admission', 30.00, 600, 600),
-(21, 12, 'VIP', 60.00, 150, 150),
-(22, 12, 'Early Bird', 22.00, 250, 250),
-(23, 13, 'General Admission', 35.00, 700, 700),
-(24, 13, 'Early Bird', 25.00, 300, 300),
-(25, 14, 'Normal Seat', 25.00, 80000, 80000),
-(26, 14, 'Premium Seat', 80.00, 20000, 20000),
-(27, 15, 'Normal Seat', 30.00, 75000, 75000),
-(28, 15, 'Premium Seat', 90.00, 25000, 25000),
-(29, 16, 'Early Bird', 18.00, 200, 200),
-(30, 16, 'Regular', 25.00, 500, 500),
-(31, 16, 'Reduced', 12.00, 250, 250),
-(32, 17, 'Early Bird', 15.00, 200, 200),
-(33, 17, 'Regular', 20.00, 500, 500),
-(34, 18, 'General Admission', 12.00, 100, 100),
-(35, 19, 'Standard', 100.00, 1500, 1500),
-(36, 19, 'VIP', 250.00, 300, 300),
-(37, 20, 'General Entry', 40.00, 500, 500),
-(38, 21, 'Regular', 35.00, 800, 800),
-(39, 21, 'Student', 20.00, 200, 200),
-(40, 22, 'General', 10.00, 150, 150);
+-- Ticket Types for UPCOMING Events (11-22) - WITH DESCRIPTIONS
+INSERT INTO ticket_types (id, event_id, name, price, total_quantity, quantity_available, description) VALUES
+(19, 11, 'General Admission', 15.00, 100, 100, 'Standard entry to the event. Access to main floor.'),
+(20, 12, 'General Admission', 30.00, 600, 600, 'Standard entry ticket with access to all public areas.'),
+(21, 12, 'VIP', 60.00, 150, 150, 'VIP access with reserved seating and complimentary drinks.'),
+(22, 12, 'Early Bird', 22.00, 250, 250, 'Discounted ticket for early purchasers. Limited availability.'),
+(23, 13, 'General Admission', 35.00, 700, 700, 'Standing room access to the festival grounds.'),
+(24, 13, 'Early Bird', 25.00, 300, 300, 'Save €10 with early bird pricing. First come, first served.'),
+(25, 14, 'Normal Seat', 25.00, 80000, 80000, 'Standard stadium seating with great views of the pitch.'),
+(26, 14, 'Premium Seat', 80.00, 20000, 20000, 'Premium seating in covered sections with better views.'),
+(27, 15, 'Normal Seat', 30.00, 75000, 75000, 'Standard seating for the Athens Derby match.'),
+(28, 15, 'Premium Seat', 90.00, 25000, 25000, 'VIP seating with access to exclusive lounges.'),
+(29, 16, 'Early Bird', 18.00, 200, 200, 'Early booking discount. Limited time offer.'),
+(30, 16, 'Regular', 25.00, 500, 500, 'Standard theater seating with excellent acoustics.'),
+(31, 16, 'Reduced', 12.00, 250, 250, 'Student/Senior discount. Valid ID required at entrance.'),
+(32, 17, 'Early Bird', 15.00, 200, 200, 'Discounted early bird tickets. Book now and save!'),
+(33, 17, 'Regular', 20.00, 500, 500, 'Standard entry to the comedy show.'),
+(34, 18, 'General Admission', 12.00, 100, 100, 'Bar entry with access to all areas. No table reservation.'),
+(35, 19, 'Standard', 100.00, 1500, 1500, 'Conference pass with access to all sessions and networking events.'),
+(36, 19, 'VIP', 250.00, 300, 300, 'VIP pass with priority seating, exclusive workshops, and networking dinner.'),
+(37, 20, 'General Entry', 40.00, 500, 500, 'Beach party access with welcome drink included.'),
+(38, 21, 'Regular', 35.00, 800, 800, 'Orchestra seating for classical music evening.'),
+(39, 21, 'Student', 20.00, 200, 200, 'Student discount ticket. Valid student ID required at entrance.'),
+(40, 22, 'General', 10.00, 150, 150, 'Entry to pitch night. Network with investors and entrepreneurs.');
 
 -- Insert PAST Orders
 INSERT INTO orders (id, user_id, event_id, total_amount, status, order_date) VALUES

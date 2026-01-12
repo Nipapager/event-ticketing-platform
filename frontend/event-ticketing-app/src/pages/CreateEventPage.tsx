@@ -6,7 +6,6 @@ import ticketTypeService from '../api/ticketTypeService';
 import categoryService from '../api/categoryService';
 import venueService from '../api/venueService';
 import authService from '../api/authService';
-import AddressAutocomplete from '../components/venue/AddressAutocomplete';
 import type { Category, Venue } from '../types';
 import MapLocationPicker from '../components/venue/MapLocationPicker';
 
@@ -14,6 +13,7 @@ interface TicketType {
   name: string;
   price: string;
   totalQuantity: string;
+  description: string;
 }
 
 const CreateEventPage = () => {
@@ -50,7 +50,7 @@ const CreateEventPage = () => {
 
   // Ticket types (at least one required)
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { name: 'General Admission', price: '', totalQuantity: '' }
+    { name: 'General Admission', price: '', totalQuantity: '', description: '' }  // Add description
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,7 +97,7 @@ const CreateEventPage = () => {
   };
 
   const addTicketType = () => {
-    setTicketTypes([...ticketTypes, { name: '', price: '', totalQuantity: '' }]);
+    setTicketTypes([...ticketTypes, { name: '', price: '', totalQuantity: '', description: '' }]);
   };
 
   const removeTicketType = (index: number) => {
@@ -174,6 +174,7 @@ const CreateEventPage = () => {
       if (!ticket.name.trim()) newErrors[`ticket_${index}_name`] = 'Ticket name required';
       if (!ticket.price || parseFloat(ticket.price) <= 0) newErrors[`ticket_${index}_price`] = 'Valid price required';
       if (!ticket.totalQuantity || parseInt(ticket.totalQuantity) <= 0) newErrors[`ticket_${index}_quantity`] = 'Valid quantity required';
+      if (!ticket.description.trim()) newErrors[`ticket_${index}_description`] = 'Description required';  // NEW
     });
 
     setErrors(newErrors);
@@ -202,7 +203,8 @@ const CreateEventPage = () => {
           ticketTypeService.createTicketType(event.id, {
             name: ticket.name,
             price: parseFloat(ticket.price),
-            totalQuantity: parseInt(ticket.totalQuantity)
+            totalQuantity: parseInt(ticket.totalQuantity),
+            description: ticket.description
           })
         )
       );
@@ -410,7 +412,7 @@ const CreateEventPage = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Name *
@@ -420,7 +422,7 @@ const CreateEventPage = () => {
                         value={ticket.name}
                         onChange={(e) => handleTicketTypeChange(index, 'name', e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="e.g., VIP, General"
+                        placeholder="e.g., VIP, General, Early Bird"
                       />
                       {errors[`ticket_${index}_name`] && (
                         <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_name`]}</p>
@@ -461,6 +463,26 @@ const CreateEventPage = () => {
                         <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_quantity`]}</p>
                       )}
                     </div>
+                  </div>
+
+                  {/* Description Field - FULL WIDTH */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description *
+                    </label>
+                    <textarea
+                      value={ticket.description}
+                      onChange={(e) => handleTicketTypeChange(index, 'description', e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., Early bird discount for first 100 tickets, Student ticket - ID required at entrance, etc."
+                    />
+                    {errors[`ticket_${index}_description`] && (
+                      <p className="text-red-600 text-xs mt-1">{errors[`ticket_${index}_description`]}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Explain what this ticket includes, any restrictions, or special conditions
+                    </p>
                   </div>
                 </div>
               ))}

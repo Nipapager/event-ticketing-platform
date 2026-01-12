@@ -40,6 +40,9 @@ public class TicketType {
     @Column(nullable = false)
     private Integer quantityAvailable;  // Remaining tickets
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

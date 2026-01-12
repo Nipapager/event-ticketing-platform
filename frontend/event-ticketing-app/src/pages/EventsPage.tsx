@@ -31,6 +31,7 @@ const EventsPage = () => {
     priceRange: [0, 500],
   });
 
+  const [searchInput, setSearchInput] = useState('');
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
 
@@ -40,24 +41,24 @@ const EventsPage = () => {
       try {
         setLoading(true);
         const data = await eventService.getAllEvents();
-        
+
         // Filter out past events
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const futureEvents = data.filter(event => {
           const eventDate = new Date(event.eventDate);
           eventDate.setHours(0, 0, 0, 0);
           return eventDate >= today;
         });
-        
+
         setEvents(futureEvents);
         setFilteredEvents(futureEvents);
-        
+
         // Extract unique cities and categories
         const cities = Array.from(new Set(futureEvents.map(e => e.venueCity).filter(Boolean))) as string[];
         const categories = Array.from(new Set(futureEvents.map(e => e.categoryName).filter(Boolean))) as string[];
-        
+
         setAvailableCities(cities.sort());
         setAvailableCategories(categories.sort());
       } catch (err: any) {
@@ -75,11 +76,11 @@ const EventsPage = () => {
   useEffect(() => {
     let filtered = [...events];
 
-    // Search query filter
-    if (searchQuery) {
+    // Search input filter (real-time search)
+    if (searchInput) {
       filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        event.description.toLowerCase().includes(searchQuery.toLowerCase())
+        event.title.toLowerCase().includes(searchInput.toLowerCase()) ||
+        event.description.toLowerCase().includes(searchInput.toLowerCase())
       );
     }
 
@@ -162,7 +163,7 @@ const EventsPage = () => {
     }
 
     setFilteredEvents(filtered);
-  }, [events, filters, sortBy, searchQuery]);
+  }, [events, filters, sortBy, searchInput]);
 
   const handleFilterChange = (newFilters: FilterOptions) => {
     setFilters(newFilters);
@@ -188,7 +189,8 @@ const EventsPage = () => {
       {/* Page Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          {/* Title and Count */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-800">All Events</h1>
               <p className="text-gray-600 mt-1">
@@ -196,31 +198,62 @@ const EventsPage = () => {
               </p>
             </div>
 
-            {/* Sort & Filter Controls */}
-            <div className="flex items-center gap-3 mt-4 md:mt-0">
-              <button
-                onClick={() => setShowMobileFilters(true)}
-                className="md:hidden flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                Filters ({activeFilterCount})
-              </button>
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setShowMobileFilters(true)}
+              className="md:hidden flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg mt-4"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filters ({activeFilterCount})
+            </button>
+          </div>
 
-              <div className="flex items-center gap-2">
-                <label className="text-gray-700 font-medium hidden md:block">Sort by:</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          {/* Search Bar and Sort - BETWEEN Title and Content */}
+          <div className="flex flex-col md:flex-row gap-3">
+            {/* Search Bar */}
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search events by title or description..."
+                className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <svg
+                className="absolute left-3 top-2.5 w-5 h-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {searchInput && (
+                <button
+                  onClick={() => setSearchInput('')}
+                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
                 >
-                  <option value="relevance">Relevance</option>
-                  <option value="date">Date</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                </select>
-              </div>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-2">
+              <label className="text-gray-700 font-medium hidden md:block whitespace-nowrap">Sort by:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="relevance">Relevance</option>
+                <option value="date">Date</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
             </div>
           </div>
         </div>
