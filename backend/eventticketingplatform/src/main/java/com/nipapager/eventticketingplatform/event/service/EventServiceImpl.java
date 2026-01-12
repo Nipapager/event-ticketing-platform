@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -90,19 +92,30 @@ public class EventServiceImpl implements EventService {
     public Response<List<EventDTO>> getAllEvents() {
         log.info("Fetching all events");
 
-        User currentUser = userService.getCurrentLoggedInUser();
-        boolean isAdmin = isUserAdmin(currentUser);
-
         List<Event> events;
 
-        if (isAdmin) {
-            // Admin sees all events
-            events = eventRepository.findAll();
-            log.info("Admin fetching all events (including pending/rejected)");
+        // Check if user is authenticated
+        boolean isAuthenticated = SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
+                && !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
+
+        if (isAuthenticated) {
+            User currentUser = userService.getCurrentLoggedInUser();
+            boolean isAdmin = isUserAdmin(currentUser);
+
+            if (isAdmin) {
+                // Admin sees all events
+                events = eventRepository.findAll();
+                log.info("Admin fetching all events (including pending/rejected)");
+            } else {
+                // Authenticated users see only approved events
+                events = eventRepository.findByStatus(EventStatus.APPROVED);
+                log.info("Authenticated user fetching approved events only");
+            }
         } else {
-            // Regular users see only approved events
+            // Public users see only approved events
             events = eventRepository.findByStatus(EventStatus.APPROVED);
-            log.info("User fetching approved events only");
+            log.info("Public user fetching approved events only");
         }
 
         // Map to DTOs
@@ -124,6 +137,26 @@ public class EventServiceImpl implements EventService {
         // Find event
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + id));
+
+        // Check if event is approved OR if user is admin/organizer
+        boolean isAuthenticated = SecurityContextHolder.getContext().getAuthentication() != null
+                && SecurityContextHolder.getContext().getAuthentication().isAuthenticated()
+                && !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
+
+        if (event.getStatus() != EventStatus.APPROVED && !isAuthenticated) {
+            // Non-approved events require authentication
+            throw new ForbiddenException("This event is not available");
+        }
+
+        if (event.getStatus() != EventStatus.APPROVED && isAuthenticated) {
+            User currentUser = userService.getCurrentLoggedInUser();
+            boolean isAdmin = isUserAdmin(currentUser);
+            boolean isOrganizer = event.getOrganizer().getId().equals(currentUser.getId());
+
+            if (!isAdmin && !isOrganizer) {
+                throw new ForbiddenException("This event is not available");
+            }
+        }
 
         // Map to DTO
         EventDTO eventDTO = mapToDTO(event);
@@ -354,6 +387,10 @@ public class EventServiceImpl implements EventService {
         dto.setVenueAddress(event.getVenue().getAddress());
         dto.setVenueCity(event.getVenue().getCity());
         dto.setVenueCapacity(event.getVenue().getCapacity());
+
+        // Add venue coordinates
+        dto.setVenueLatitude(event.getVenue().getLatitude());
+        dto.setVenueLongitude(event.getVenue().getLongitude());
 
         // Set organizer details
         dto.setOrganizerId(event.getOrganizer().getId());

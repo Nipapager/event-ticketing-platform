@@ -26,6 +26,7 @@ public class VenueServiceImpl implements VenueService {
 
     private final VenueRepository venueRepository;
     private final ModelMapper modelMapper;
+    private final GeocodingService geocodingService; // NEW
 
     @Override
     public Response<VenueDTO> createVenue(VenueDTO venueDTO) {
@@ -39,6 +40,27 @@ public class VenueServiceImpl implements VenueService {
         // Map DTO to entity
         Venue venue = modelMapper.map(venueDTO, Venue.class);
         venue.setCreatedAt(LocalDateTime.now());
+
+        // Use provided coordinates if available, otherwise try geocoding
+        if (venueDTO.getLatitude() != null && venueDTO.getLongitude() != null) {
+            venue.setLatitude(venueDTO.getLatitude());
+            venue.setLongitude(venueDTO.getLongitude());
+            log.info("Using provided coordinates: ({}, {})",
+                    venueDTO.getLatitude(), venueDTO.getLongitude());
+        } else {
+            // Fallback to geocoding
+            String fullAddress = buildFullAddress(venueDTO);
+            GeocodingService.GeocodingResult coords = geocodingService.geocode(fullAddress);
+
+            if (coords != null) {
+                venue.setLatitude(coords.getLatitude());
+                venue.setLongitude(coords.getLongitude());
+                log.info("Geocoding successful: ({}, {})",
+                        coords.getLatitude(), coords.getLongitude());
+            } else {
+                log.warn("Geocoding failed for venue: {}", fullAddress);
+            }
+        }
 
         // Save to database
         Venue savedVenue = venueRepository.save(venue);
@@ -118,24 +140,30 @@ public class VenueServiceImpl implements VenueService {
         Venue venue = venueRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Venue not found with id: " + id));
 
-        // Update name if provided (no duplicate check needed)
+        boolean addressChanged = false;
+
+        // Update name if provided
         if (venueDTO.getName() != null && !venueDTO.getName().isEmpty()) {
             venue.setName(venueDTO.getName());
         }
 
-        // Update address if provided (check for duplicate)
+        // Update address if provided
         if (venueDTO.getAddress() != null && !venueDTO.getAddress().isEmpty()) {
-            // Only check if address is being changed
-            if (!venue.getAddress().equals(venueDTO.getAddress()) &&
-                    venueRepository.existsByAddress(venueDTO.getAddress())) {
-                throw new BadRequestException("Venue already exists at this address");
+            if (!venue.getAddress().equals(venueDTO.getAddress())) {
+                if (venueRepository.existsByAddress(venueDTO.getAddress())) {
+                    throw new BadRequestException("Venue already exists at this address");
+                }
+                venue.setAddress(venueDTO.getAddress());
+                addressChanged = true;
             }
-            venue.setAddress(venueDTO.getAddress());
         }
 
         // Update city if provided
         if (venueDTO.getCity() != null && !venueDTO.getCity().isEmpty()) {
-            venue.setCity(venueDTO.getCity());
+            if (!venue.getCity().equals(venueDTO.getCity())) {
+                venue.setCity(venueDTO.getCity());
+                addressChanged = true;
+            }
         }
 
         // Update capacity if provided
@@ -153,9 +181,25 @@ public class VenueServiceImpl implements VenueService {
             venue.setImageUrl(venueDTO.getImageUrl());
         }
 
-        // Update map coordinates if provided
-        if (venueDTO.getMapCoordinates() != null && !venueDTO.getMapCoordinates().isEmpty()) {
-            venue.setMapCoordinates(venueDTO.getMapCoordinates());
+        // RE-GEOCODE if address changed
+        if (addressChanged) {
+            String fullAddress = buildFullAddress(venue);
+            GeocodingService.GeocodingResult coords = geocodingService.geocode(fullAddress);
+
+            if (coords != null) {
+                venue.setLatitude(coords.getLatitude());
+                venue.setLongitude(coords.getLongitude());
+                log.info("Re-geocoding successful: ({}, {})",
+                        coords.getLatitude(), coords.getLongitude());
+            }
+        }
+
+        // Update coordinates if explicitly provided
+        if (venueDTO.getLatitude() != null) {
+            venue.setLatitude(venueDTO.getLatitude());
+        }
+        if (venueDTO.getLongitude() != null) {
+            venue.setLongitude(venueDTO.getLongitude());
         }
 
         // Set updated timestamp
@@ -192,5 +236,19 @@ public class VenueServiceImpl implements VenueService {
                 .statusCode(HttpStatus.OK.value())
                 .message("Venue deleted successfully")
                 .build();
+    }
+
+    /**
+     * Build full address string for geocoding
+     */
+    private String buildFullAddress(VenueDTO venueDTO) {
+        return String.format("%s, %s, Greece", venueDTO.getAddress(), venueDTO.getCity());
+    }
+
+    /**
+     * Build full address string from venue entity
+     */
+    private String buildFullAddress(Venue venue) {
+        return String.format("%s, %s, Greece", venue.getAddress(), venue.getCity());
     }
 }

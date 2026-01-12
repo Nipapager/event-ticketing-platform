@@ -39,7 +39,10 @@ public class Venue {
 
     private String imageUrl;
 
-    private String mapCoordinates;  // For Google Maps integration
+    private String mapCoordinates;
+
+    private Double latitude;
+    private Double longitude;
 
     private LocalDateTime createdAt;
 

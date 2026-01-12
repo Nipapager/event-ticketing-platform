@@ -39,7 +39,7 @@ const PastEventsPage = () => {
       const past = data.filter(order => {
         const eventDate = new Date(order.eventDate);
         eventDate.setHours(0, 0, 0, 0);
-        return eventDate < today && order.status === 'COMPLETED';
+        return eventDate < today && (order.status === 'COMPLETED' || order.status === 'CONFIRMED');
       });
 
       setPastOrders(past);

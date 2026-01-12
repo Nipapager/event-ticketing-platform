@@ -11,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - Add JWT token to every request
+// Request interceptor - Add JWT token to every request (if exists)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -29,12 +29,32 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Don't redirect if the endpoint is public (events, categories, venues)
     if (error.response?.status === 401) {
-      // Unauthorized - clear token and redirect to login
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const requestUrl = error.config?.url || '';
+      
+      // List of public endpoints that don't require authentication
+      const publicEndpoints = [
+        '/auth/',
+        '/events',
+        '/categories',
+        '/venues',
+        '/reviews/event',
+      ];
+      
+      // Check if this is a public endpoint
+      const isPublicEndpoint = publicEndpoints.some(endpoint => 
+        requestUrl.includes(endpoint)
+      );
+      
+      // Only redirect to login if it's NOT a public endpoint
+      if (!isPublicEndpoint) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
+    
     return Promise.reject(error);
   }
 );

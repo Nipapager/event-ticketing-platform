@@ -21,7 +21,7 @@ public class VenueController {
     private final VenueService venueService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZER', 'ROLE_ADMIN')") // Changed from ROLE_ADMIN only
     public ResponseEntity<Response<VenueDTO>> createVenue(@RequestBody VenueDTO venueDTO) {
         Response<VenueDTO> response = venueService.createVenue(venueDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);

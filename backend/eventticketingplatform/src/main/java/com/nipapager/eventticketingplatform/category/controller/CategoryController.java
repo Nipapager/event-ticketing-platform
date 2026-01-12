@@ -21,11 +21,12 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ORGANIZER', 'ROLE_ADMIN')") // Changed from ROLE_ADMIN only
     public ResponseEntity<Response<CategoryDTO>> createCategory(@RequestBody CategoryDTO categoryDTO) {
         Response<CategoryDTO> response = categoryService.createCategory(categoryDTO);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
 
     @GetMapping
     public ResponseEntity<Response<List<CategoryDTO>>> getAllCategories() {
@@ -54,4 +55,6 @@ public class CategoryController {
         Response<Void> response = categoryService.deleteCategory(id);
         return ResponseEntity.ok(response);
     }
+
+
 }

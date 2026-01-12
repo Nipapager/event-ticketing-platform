@@ -6,7 +6,9 @@ import ticketTypeService from '../api/ticketTypeService';
 import categoryService from '../api/categoryService';
 import venueService from '../api/venueService';
 import authService from '../api/authService';
+import AddressAutocomplete from '../components/venue/AddressAutocomplete';
 import type { Category, Venue } from '../types';
+import MapLocationPicker from '../components/venue/MapLocationPicker';
 
 interface TicketType {
   name: string;
@@ -19,6 +21,21 @@ const CreateEventPage = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
+
+  // Modals
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showVenueModal, setShowVenueModal] = useState(false);
+
+  // New category/venue data
+  const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+  const [newVenue, setNewVenue] = useState({
+    name: '',
+    address: '',
+    city: '',
+    capacity: '',
+    latitude: 0,
+    longitude: 0
+  });
 
   // Event form data
   const [formData, setFormData] = useState({
@@ -89,6 +106,59 @@ const CreateEventPage = () => {
     }
   };
 
+  // CREATE NEW CATEGORY
+  const handleCreateCategory = async () => {
+    if (!newCategory.name.trim()) {
+      toast.error('Category name is required');
+      return;
+    }
+
+    const toastId = toast.loading('Creating category...');
+    try {
+      const created = await categoryService.createCategory(newCategory);
+      setCategories([...categories, created]);
+      setFormData({ ...formData, categoryId: created.id.toString() });
+      setNewCategory({ name: '', description: '' });
+      setShowCategoryModal(false);
+      toast.success('Category created!', { id: toastId });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create category', { id: toastId });
+    }
+  };
+
+  // CREATE NEW VENUE
+  const handleCreateVenue = async () => {
+    if (!newVenue.name.trim() || !newVenue.address.trim() || !newVenue.city.trim() || !newVenue.capacity) {
+      toast.error('All venue fields are required');
+      return;
+    }
+
+    if (newVenue.latitude === 0 || newVenue.longitude === 0) {
+      toast.error('Please click on the map to mark the venue location');
+      return;
+    }
+
+    const toastId = toast.loading('Creating venue...');
+    try {
+      const created = await venueService.createVenue({
+        name: newVenue.name,
+        address: newVenue.address,
+        city: newVenue.city,
+        capacity: parseInt(newVenue.capacity),
+        latitude: newVenue.latitude,
+        longitude: newVenue.longitude
+      });
+
+      setVenues([...venues, created]);
+      setFormData({ ...formData, venueId: created.id.toString() });
+      setNewVenue({ name: '', address: '', city: '', capacity: '', latitude: 0, longitude: 0 });
+      setShowVenueModal(false);
+      toast.success('Venue created successfully!', { id: toastId });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to create venue', { id: toastId });
+    }
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -150,7 +220,7 @@ const CreateEventPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Create New Event</h1>
@@ -158,11 +228,11 @@ const CreateEventPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
+
           {/* Basic Info Card */}
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Basic Information</h2>
-            
+
             <div className="space-y-4">
               {/* Title */}
               <div>
@@ -198,41 +268,63 @@ const CreateEventPage = () => {
 
               {/* Category & Venue */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Category */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Category *
                   </label>
-                  <select
-                    name="categoryId"
-                    value={formData.categoryId}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select category</option>
-                    {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      name="categoryId"
+                      value={formData.categoryId}
+                      onChange={handleInputChange}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select category</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowCategoryModal(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                      title="Add new category"
+                    >
+                      +
+                    </button>
+                  </div>
                   {errors.categoryId && <p className="text-red-600 text-sm mt-1">{errors.categoryId}</p>}
                 </div>
 
+                {/* Venue */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Venue *
                   </label>
-                  <select
-                    name="venueId"
-                    value={formData.venueId}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select venue</option>
-                    {venues.map(venue => (
-                      <option key={venue.id} value={venue.id}>
-                        {venue.name} - {venue.city}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select
+                      name="venueId"
+                      value={formData.venueId}
+                      onChange={handleInputChange}
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select venue</option>
+                      {venues.map(venue => (
+                        <option key={venue.id} value={venue.id}>
+                          {venue.name} - {venue.city}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => setShowVenueModal(true)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                      title="Add new venue"
+                    >
+                      +
+                    </button>
+                  </div>
                   {errors.venueId && <p className="text-red-600 text-sm mt-1">{errors.venueId}</p>}
                 </div>
               </div>
@@ -394,6 +486,159 @@ const CreateEventPage = () => {
           </div>
         </form>
       </div>
+
+      {/* ADD CATEGORY MODAL */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Add New Category</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Category Name *
+                </label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Concert, Sports"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={newCategory.description}
+                  onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="Brief description..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCategoryModal(false);
+                  setNewCategory({ name: '', description: '' });
+                }}
+                className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateCategory}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD VENUE MODAL */}
+      {showVenueModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Add New Venue</h3>
+
+            <div className="space-y-4">
+              {/* Venue Name */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Venue Name *
+                </label>
+                <input
+                  type="text"
+                  value={newVenue.name}
+                  onChange={(e) => setNewVenue({ ...newVenue, name: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Thessaloniki Concert Hall"
+                />
+              </div>
+
+              <MapLocationPicker
+                onLocationSelect={(address, city, lat, lon) => {
+                  setNewVenue({
+                    ...newVenue,
+                    address,
+                    city,
+                    latitude: lat,
+                    longitude: lon
+                  });
+                }}
+                initialAddress={newVenue.address}
+                initialCity={newVenue.city}
+              />
+
+              {/* Show selected location */}
+              {newVenue.latitude !== 0 && newVenue.longitude !== 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                  <p className="text-sm font-semibold text-green-800 mb-1">
+                    ✓ Location Selected
+                  </p>
+                  <p className="text-xs text-green-700">
+                    {newVenue.address}, {newVenue.city}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    📍 {newVenue.latitude.toFixed(6)}, {newVenue.longitude.toFixed(6)}
+                  </p>
+                </div>
+              )}
+
+              {/* Capacity */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Capacity *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={newVenue.capacity}
+                  onChange={(e) => setNewVenue({ ...newVenue, capacity: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., 5000"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  💡 <strong>Tip:</strong> Start typing the address and select from the suggestions for accurate location.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowVenueModal(false);
+                  setNewVenue({ name: '', address: '', city: '', capacity: '', latitude: 0, longitude: 0 });
+                }}
+                className="flex-1 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateVenue}
+                disabled={!newVenue.name || !newVenue.address || !newVenue.capacity || newVenue.latitude === 0}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Create Venue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

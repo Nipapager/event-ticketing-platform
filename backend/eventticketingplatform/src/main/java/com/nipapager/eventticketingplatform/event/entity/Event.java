@@ -66,6 +66,7 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<TicketType> ticketTypes;
 
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

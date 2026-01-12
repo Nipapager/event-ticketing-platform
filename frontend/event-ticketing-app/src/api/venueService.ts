@@ -12,6 +12,19 @@ const venueService = {
   getVenueById: async (id: number): Promise<Venue> => {
     const response = await api.get(`/venues/${id}`);
     return response.data.data;
+  },
+
+  // Create venue 
+  createVenue: async (data: { 
+    name: string; 
+    address: string; 
+    city: string; 
+    capacity: number;
+    latitude?: number;
+    longitude?: number;
+  }): Promise<Venue> => {
+    const response = await api.post('/venues', data);
+    return response.data.data;
   }
 };
 

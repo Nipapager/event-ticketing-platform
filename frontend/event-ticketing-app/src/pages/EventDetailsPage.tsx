@@ -4,6 +4,7 @@ import eventService from '../api/eventService';
 import type { Event, TicketType } from '../types';
 import authService from '../api/authService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import EventMap from '../components/common/EventMap';
 
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -210,26 +211,44 @@ const EventDetailsPage = () => {
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Location</h2>
 
-              {/* Map placeholder */}
-              <div className="bg-gray-200 rounded-lg h-64 mb-4 flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                  <p>Map integration coming soon</p>
-                </div>
+              {/* Map */}
+              <div className="mb-4">
+                <EventMap
+                  latitude={event.venueLatitude || 0}
+                  longitude={event.venueLongitude || 0}
+                  venueName={event.venueName}
+                  venueAddress={event.venueAddress || ''}
+                  height="360px"
+                />
               </div>
 
               {/* Venue details */}
-              <div className="text-gray-700">
-                <p className="font-semibold">{event.venueName}</p>
-                {event.venueAddress && <p>{event.venueAddress}</p>}
-                {event.venueCity && <p>{event.venueCity}</p>}
-                {event.venueCapacity && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Capacity: {event.venueCapacity.toLocaleString()} people
-                  </p>
-                )}
+              <div className="text-gray-700 space-y-2">
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <div>
+                    <p className="font-semibold text-gray-800">{event.venueName}</p>
+                    {event.venueCapacity && (
+                      <p className="text-sm text-gray-500">Capacity: {event.venueCapacity.toLocaleString()}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <svg className="w-5 h-5 text-gray-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div>
+                    {event.venueAddress && <p className="text-gray-700">{event.venueAddress}</p>}
+                    {event.venueCity && <p className="text-gray-600">{event.venueCity}, Greece</p>}
+                  </div>
+                </div>
+
+                
+            
               </div>
             </div>
 

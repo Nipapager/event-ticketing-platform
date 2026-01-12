@@ -12,6 +12,12 @@ const categoryService = {
   getCategoryById: async (id: number): Promise<Category> => {
     const response = await api.get(`/categories/${id}`);
     return response.data.data;
+  },
+
+  // Create category
+  createCategory: async (data: { name: string; description?: string }): Promise<Category> => {
+    const response = await api.post('/categories', data);
+    return response.data.data;
   }
 };
 

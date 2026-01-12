@@ -36,4 +36,6 @@ public class EventDTO {
     private List<TicketTypeDTO> ticketTypes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Double venueLatitude;
+    private Double venueLongitude;
 }

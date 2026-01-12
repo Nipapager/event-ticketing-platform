@@ -3,7 +3,6 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-
 /**
  * DTO for Venue entity
  */
@@ -16,6 +15,8 @@ public class VenueDTO {
     private Integer capacity;
     private String description;
     private String imageUrl;
+    private Double latitude;
+    private Double longitude;
     private String mapCoordinates;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

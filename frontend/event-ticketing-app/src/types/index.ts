@@ -43,6 +43,8 @@ export interface Event {
   venueAddress?: string;
   venueCity?: string;
   venueCapacity?: number;
+  venueLatitude?: number;
+  venueLongitude?: number;
   eventDate: string;
   eventTime: string;
   imageUrl?: string;
