@@ -5,6 +5,8 @@ import type { Event, TicketType } from '../types';
 import authService from '../api/authService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import EventMap from '../components/common/EventMap';
+import OrganizerPastEvents from '../components/events/OrganizerPastEvents';
+import ReviewsSection from '../components/events/ReviewsSection';
 
 const EventDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,6 +62,16 @@ const EventDetailsPage = () => {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
+  };
+
+  // Check if event is past
+  const isPastEvent = () => {
+    if (!event) return false;
+    const eventDate = new Date(event.eventDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate < today;
   };
 
   // Calculate total price
@@ -129,8 +141,10 @@ const EventDetailsPage = () => {
     );
   }
 
+  const isEventPast = isPastEvent();
+
   return (
-    <div className="min-h-screen bg-gray-50 pb-32 md:pb-8">
+    <div className={`min-h-screen bg-gray-50 ${!isEventPast ? 'pb-32 md:pb-8' : 'pb-8'}`}>
 
       {/* Hero Image */}
       <div className="relative h-80 md:h-96 bg-gray-200">
@@ -159,14 +173,21 @@ const EventDetailsPage = () => {
           </svg>
           Back
         </button>
+
+        {/* Past Event Badge */}
+        {isEventPast && (
+          <div className="absolute top-4 right-4 bg-gray-800/90 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
+            <span className="font-semibold">Past Event</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`grid grid-cols-1 ${!isEventPast ? 'lg:grid-cols-3' : ''} gap-8`}>
 
           {/* Main content area */}
-          <div className="lg:col-span-2">
+          <div className={!isEventPast ? 'lg:col-span-2' : ''}>
 
             {/* Event title */}
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
@@ -246,14 +267,11 @@ const EventDetailsPage = () => {
                     {event.venueCity && <p className="text-gray-600">{event.venueCity}, Greece</p>}
                   </div>
                 </div>
-
-
-
               </div>
             </div>
 
-            {/* Ticket Information Section */}
-            {event.ticketTypes && event.ticketTypes.length > 0 && (
+            {/* Ticket Information Section - Only for upcoming events */}
+            {!isEventPast && event.ticketTypes && event.ticketTypes.length > 0 && (
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Available Tickets</h2>
                 <div className="space-y-4">
@@ -304,6 +322,17 @@ const EventDetailsPage = () => {
               </div>
             )}
 
+            {/* Conditional Section: Reviews for past events, Past Events for upcoming */}
+            {isEventPast ? (
+              <ReviewsSection eventId={event.id} />
+            ) : (
+              <OrganizerPastEvents
+                organizerId={event.organizerId}
+                currentEventId={event.id}
+                organizerName={event.organizerName}
+              />
+            )}
+
             {/* Organizer section */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Organizer</h2>
@@ -321,165 +350,169 @@ const EventDetailsPage = () => {
             </div>
           </div>
 
-          {/* Sidebar for desktop booking */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Tickets</h2>
+          {/* Sidebar for desktop booking - Only for upcoming events */}
+          {!isEventPast && (
+            <div className="hidden lg:block lg:col-span-1">
+              <div className="bg-white rounded-lg shadow-lg p-6 sticky top-4">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Tickets</h2>
 
-              {/* Starting price display */}
-              <div className="mb-4">
-                <p className="text-3xl font-bold text-gray-800">
-                  From €{event.ticketTypes && event.ticketTypes.length > 0
+                {/* Starting price display */}
+                <div className="mb-4">
+                  <p className="text-3xl font-bold text-gray-800">
+                    From €{event.ticketTypes && event.ticketTypes.length > 0
+                      ? Math.min(...event.ticketTypes.map(t => t.price)).toFixed(2)
+                      : '0.00'}
+                  </p>
+                </div>
+
+                {event.ticketTypes && event.ticketTypes.length > 0 ? (
+                  <>
+                    {/* Ticket type dropdown */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ticket Type
+                      </label>
+                      <select
+                        value={selectedTicketType?.id || ''}
+                        onChange={(e) => handleTicketTypeChange(parseInt(e.target.value))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        {event.ticketTypes.map((ticket) => (
+                          <option key={ticket.id} value={ticket.id}>
+                            {ticket.name} - €{ticket.price.toFixed(2)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Quantity selector */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Quantity
+                      </label>
+                      <div className="flex items-center justify-between border border-gray-300 rounded-lg">
+                        <button
+                          onClick={() => handleQuantityChange(-1)}
+                          disabled={quantity <= 1}
+                          className="px-4 py-3 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-l-lg"
+                        >
+                          −
+                        </button>
+                        <span className="px-4 py-3 font-semibold">{quantity}</span>
+                        <button
+                          onClick={() => handleQuantityChange(1)}
+                          disabled={!selectedTicketType || quantity >= selectedTicketType.quantityAvailable}
+                          className="px-4 py-3 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-r-lg"
+                        >
+                          +
+                        </button>
+                      </div>
+                      {selectedTicketType && (
+                        <p className="text-sm text-gray-500 mt-1">
+                          {selectedTicketType.quantityAvailable} tickets available
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Total price */}
+                    <div className="flex justify-between items-center mb-4 py-3 border-t border-b">
+                      <span className="font-semibold text-gray-700">Total:</span>
+                      <span className="text-2xl font-bold text-gray-800">
+                        €{calculateTotal().toFixed(2)}
+                      </span>
+                    </div>
+
+                    {/* Book now button */}
+                    <button
+                      onClick={handleBookNow}
+                      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold text-lg"
+                    >
+                      Book Now
+                    </button>
+
+                    {/* Security note */}
+                    <p className="text-xs text-gray-500 text-center mt-3">
+                      Secure booking, instant confirmation
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-gray-600">No tickets available</p>
+                )}
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      {/* Mobile sticky booking bar at bottom - Only for upcoming events */}
+      {!isEventPast && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-10">
+          <div className="max-w-md mx-auto">
+            {/* Price and quantity controls */}
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm text-gray-600">From</p>
+                <p className="text-2xl font-bold text-gray-800">
+                  €{event.ticketTypes && event.ticketTypes.length > 0
                     ? Math.min(...event.ticketTypes.map(t => t.price)).toFixed(2)
                     : '0.00'}
                 </p>
               </div>
 
-              {event.ticketTypes && event.ticketTypes.length > 0 ? (
-                <>
-                  {/* Ticket type dropdown */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ticket Type
-                    </label>
-                    <select
-                      value={selectedTicketType?.id || ''}
-                      onChange={(e) => handleTicketTypeChange(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {event.ticketTypes.map((ticket) => (
-                        <option key={ticket.id} value={ticket.id}>
-                          {ticket.name} - €{ticket.price.toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Quantity selector */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Quantity
-                    </label>
-                    <div className="flex items-center justify-between border border-gray-300 rounded-lg">
-                      <button
-                        onClick={() => handleQuantityChange(-1)}
-                        disabled={quantity <= 1}
-                        className="px-4 py-3 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-l-lg"
-                      >
-                        −
-                      </button>
-                      <span className="px-4 py-3 font-semibold">{quantity}</span>
-                      <button
-                        onClick={() => handleQuantityChange(1)}
-                        disabled={!selectedTicketType || quantity >= selectedTicketType.quantityAvailable}
-                        className="px-4 py-3 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-r-lg"
-                      >
-                        +
-                      </button>
-                    </div>
-                    {selectedTicketType && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        {selectedTicketType.quantityAvailable} tickets available
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Total price */}
-                  <div className="flex justify-between items-center mb-4 py-3 border-t border-b">
-                    <span className="font-semibold text-gray-700">Total:</span>
-                    <span className="text-2xl font-bold text-gray-800">
-                      €{calculateTotal().toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Book now button */}
-                  <button
-                    onClick={handleBookNow}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold text-lg"
-                  >
-                    Book Now
-                  </button>
-
-                  {/* Security note */}
-                  <p className="text-xs text-gray-500 text-center mt-3">
-                    Secure booking, instant confirmation
-                  </p>
-                </>
-              ) : (
-                <p className="text-gray-600">No tickets available</p>
-              )}
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Mobile sticky booking bar at bottom */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-4 z-10">
-        <div className="max-w-md mx-auto">
-          {/* Price and quantity controls */}
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-sm text-gray-600">From</p>
-              <p className="text-2xl font-bold text-gray-800">
-                €{event.ticketTypes && event.ticketTypes.length > 0
-                  ? Math.min(...event.ticketTypes.map(t => t.price)).toFixed(2)
-                  : '0.00'}
-              </p>
+              {/* Quantity controls */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => handleQuantityChange(-1)}
+                  disabled={quantity <= 1}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                >
+                  −
+                </button>
+                <span className="font-semibold text-lg w-8 text-center">{quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(1)}
+                  disabled={!selectedTicketType || quantity >= selectedTicketType.quantityAvailable}
+                  className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                >
+                  +
+                </button>
+              </div>
             </div>
 
-            {/* Quantity controls */}
+            {/* Ticket type selector for mobile */}
+            {event.ticketTypes && event.ticketTypes.length > 0 && (
+              <select
+                value={selectedTicketType?.id || ''}
+                onChange={(e) => handleTicketTypeChange(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm"
+              >
+                {event.ticketTypes.map((ticket) => (
+                  <option key={ticket.id} value={ticket.id}>
+                    {ticket.name} €{ticket.price.toFixed(2)}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Total and book button */}
             <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <p className="text-sm text-gray-600">Total:</p>
+                <p className="text-xl font-bold text-gray-800">
+                  €{calculateTotal().toFixed(2)}
+                </p>
+              </div>
               <button
-                onClick={() => handleQuantityChange(-1)}
-                disabled={quantity <= 1}
-                className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+                onClick={handleBookNow}
+                className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold"
               >
-                −
-              </button>
-              <span className="font-semibold text-lg w-8 text-center">{quantity}</span>
-              <button
-                onClick={() => handleQuantityChange(1)}
-                disabled={!selectedTicketType || quantity >= selectedTicketType.quantityAvailable}
-                className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50"
-              >
-                +
+                Book Now
               </button>
             </div>
-          </div>
-
-          {/* Ticket type selector for mobile */}
-          {event.ticketTypes && event.ticketTypes.length > 0 && (
-            <select
-              value={selectedTicketType?.id || ''}
-              onChange={(e) => handleTicketTypeChange(parseInt(e.target.value))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg mb-3 text-sm"
-            >
-              {event.ticketTypes.map((ticket) => (
-                <option key={ticket.id} value={ticket.id}>
-                  {ticket.name} €{ticket.price.toFixed(2)}
-                </option>
-              ))}
-            </select>
-          )}
-
-          {/* Total and book button */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-sm text-gray-600">Total:</p>
-              <p className="text-xl font-bold text-gray-800">
-                €{calculateTotal().toFixed(2)}
-              </p>
-            </div>
-            <button
-              onClick={handleBookNow}
-              className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-bold"
-            >
-              Book Now
-            </button>
           </div>
         </div>
-      </div>
+      )}
 
     </div>
   );

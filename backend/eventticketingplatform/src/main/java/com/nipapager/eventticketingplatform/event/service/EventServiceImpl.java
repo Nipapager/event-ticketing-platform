@@ -12,6 +12,7 @@ import com.nipapager.eventticketingplatform.exception.ForbiddenException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
 import com.nipapager.eventticketingplatform.notification.service.NotificationService;
 import com.nipapager.eventticketingplatform.response.Response;
+import com.nipapager.eventticketingplatform.review.repository.ReviewRepository;
 import com.nipapager.eventticketingplatform.user.entity.User;
 import com.nipapager.eventticketingplatform.user.service.UserService;
 import com.nipapager.eventticketingplatform.venue.entity.Venue;
@@ -43,6 +44,7 @@ public class EventServiceImpl implements EventService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private final ReviewRepository reviewRepository;
 
     @Override
     public Response<EventDTO> createEvent(EventDTO eventDTO) {
@@ -395,6 +397,12 @@ public class EventServiceImpl implements EventService {
         // Set organizer details
         dto.setOrganizerId(event.getOrganizer().getId());
         dto.setOrganizerName(event.getOrganizer().getName());
+
+        // Review info
+        Double avgRating = reviewRepository.getAverageRatingForEvent(event.getId());
+        Long reviewCount = reviewRepository.getReviewCountForEvent(event.getId());
+        dto.setAverageRating(avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : null);
+        dto.setReviewCount(reviewCount != null ? reviewCount : 0L);
 
         return dto;
     }

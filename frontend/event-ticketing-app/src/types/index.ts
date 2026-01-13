@@ -50,6 +50,8 @@ export interface Event {
   imageUrl?: string;
   organizerId: number;
   organizerName: string;
+  averageRating?: number;
+  reviewCount?: number;
   status: string;
   ticketTypes?: TicketType[];
   createdAt?: string;

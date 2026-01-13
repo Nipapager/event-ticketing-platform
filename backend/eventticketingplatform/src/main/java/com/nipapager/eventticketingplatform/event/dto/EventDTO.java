@@ -33,6 +33,8 @@ public class EventDTO {
     private String organizerName;
     private String status;
     private Boolean isFeatured;
+    private Double averageRating;
+    private Long reviewCount;
     private List<TicketTypeDTO> ticketTypes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

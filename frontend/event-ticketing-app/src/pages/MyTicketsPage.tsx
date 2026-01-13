@@ -7,10 +7,11 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const MyTicketsPage = () => {
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedQR, setSelectedQR] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
   useEffect(() => {
     if (!authService.isAuthenticated()) {
@@ -25,7 +26,13 @@ const MyTicketsPage = () => {
     try {
       setLoading(true);
       const data = await orderService.getMyOrders();
-      setOrders(data);
+      
+      // Sort orders by order date (most recent first)
+      const sortedOrders = data.sort((a, b) => 
+        new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
+      );
+      
+      setAllOrders(sortedOrders);
     } catch (err: any) {
       setError('Failed to load your tickets');
       console.error(err);
@@ -33,6 +40,24 @@ const MyTicketsPage = () => {
       setLoading(false);
     }
   };
+
+  // Separate orders into upcoming and past
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingOrders = allOrders.filter(order => {
+    const eventDate = new Date(order.eventDate);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate >= today;
+  });
+
+  const pastOrders = allOrders.filter(order => {
+    const eventDate = new Date(order.eventDate);
+    eventDate.setHours(0, 0, 0, 0);
+    return eventDate < today;
+  });
+
+  const displayedOrders = activeTab === 'upcoming' ? upcomingOrders : pastOrders;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -87,12 +112,12 @@ const MyTicketsPage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">My Tickets</h1>
           <p className="text-gray-600">
-            {orders.length} {orders.length === 1 ? 'order' : 'orders'}
+            {allOrders.length} {allOrders.length === 1 ? 'order' : 'orders'} total
           </p>
         </div>
 
         {/* No orders state */}
-        {orders.length === 0 ? (
+        {allOrders.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -111,125 +136,204 @@ const MyTicketsPage = () => {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="p-6">
-
-                  {/* Order Header */}
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-4 border-b">
-                    <div className="mb-2 md:mb-0">
-                      <h3 className="text-xl font-bold text-gray-800 mb-1">
-                        {order.eventTitle}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        {formatDate(order.eventDate)}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
-                        {order.status}
+          <>
+            {/* Tabs */}
+            <div className="bg-white rounded-lg shadow-md mb-6">
+              <div className="border-b border-gray-200">
+                <div className="flex">
+                  <button
+                    onClick={() => setActiveTab('upcoming')}
+                    className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
+                      activeTab === 'upcoming'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    Upcoming Events
+                    {upcomingOrders.length > 0 && (
+                      <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded-full">
+                        {upcomingOrders.length}
                       </span>
-                    </div>
-                  </div>
-
-                  {/* Tickets with QR Codes */}
-                  <div className="space-y-4 mb-4">
-                    {order.orderItems.map((item) => (
-                      <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                          
-                          {/* Ticket Info */}
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-800 mb-1">
-                              {item.quantity}x {item.ticketTypeName}
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-1">
-                              €{item.pricePerTicket.toFixed(2)} each
-                            </p>
-                            {item.ticketCode && (
-                              <p className="text-xs text-gray-500 font-mono">
-                                Code: {item.ticketCode}
-                              </p>
-                            )}
-                            {item.isValid === false && (
-                              <p className="text-xs text-red-600 font-semibold mt-1">
-                                ⚠️ Invalid (Refunded)
-                              </p>
-                            )}
-                          </div>
-
-                          {/* QR Code */}
-                          {item.qrCodeUrl && item.isValid !== false ? (
-                            <div className="flex items-center gap-3">
-                              <div 
-                                className="cursor-pointer hover:opacity-75 transition-opacity"
-                                onClick={() => setSelectedQR(item.qrCodeUrl!)}
-                              >
-                                <img 
-                                  src={item.qrCodeUrl} 
-                                  alt="QR Code" 
-                                  className="w-20 h-20 border-2 border-gray-300 rounded-lg"
-                                />
-                              </div>
-                              <button
-                                onClick={() => setSelectedQR(item.qrCodeUrl!)}
-                                className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
-                              >
-                                View
-                              </button>
-                            </div>
-                          ) : order.status === 'CONFIRMED' ? (
-                            <div className="text-sm text-gray-500 italic">
-                              QR code generating...
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Order Details */}
-                  <div className="border-t pt-4">
-                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                      <div className="text-sm space-y-1">
-                        <div className="flex gap-2">
-                          <span className="text-gray-600">Order ID:</span>
-                          <span className="font-semibold text-gray-800">#{order.id}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-gray-600">Order Date:</span>
-                          <span className="text-gray-800">
-                            {new Date(order.orderDate).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600 mb-1">Total Paid</p>
-                        <p className="text-2xl font-bold text-gray-800">
-                          €{order.totalAmount.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      onClick={() => navigate(`/events/${order.eventId}`)}
-                      className="flex-1 md:flex-none border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
-                    >
-                      View Event
-                    </button>
-                  </div>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('past')}
+                    className={`flex-1 px-6 py-4 text-center font-semibold transition-colors ${
+                      activeTab === 'past'
+                        ? 'text-blue-600 border-b-2 border-blue-600'
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                  >
+                    Past Events
+                    {pastOrders.length > 0 && (
+                      <span className="ml-2 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        {pastOrders.length}
+                      </span>
+                    )}
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Orders List */}
+            {displayedOrders.length === 0 ? (
+              <div className="bg-white rounded-lg shadow-md p-12 text-center">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {activeTab === 'upcoming' ? 'No upcoming events' : 'No past events'}
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  {activeTab === 'upcoming' 
+                    ? 'Book an event to see your upcoming tickets here'
+                    : 'Your attended events will appear here'
+                  }
+                </p>
+                {activeTab === 'upcoming' && (
+                  <button
+                    onClick={() => navigate('/events')}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                  >
+                    Browse Events
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {displayedOrders.map((order) => {
+                  const isPastEvent = new Date(order.eventDate) < today;
+                  
+                  return (
+                    <div key={order.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                      <div className="p-6">
+
+                        {/* Order Header */}
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 pb-4 border-b">
+                          <div className="mb-2 md:mb-0">
+                            <h3 className="text-xl font-bold text-gray-800 mb-1">
+                              {order.eventTitle}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm text-gray-600">
+                                {formatDate(order.eventDate)}
+                              </p>
+                              {isPastEvent && (
+                                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                  Attended
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(order.status)}`}>
+                              {order.status}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Tickets with QR Codes */}
+                        <div className="space-y-4 mb-4">
+                          {order.orderItems.map((item) => (
+                            <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                
+                                {/* Ticket Info */}
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-gray-800 mb-1">
+                                    {item.quantity}x {item.ticketTypeName}
+                                  </h4>
+                                  <p className="text-sm text-gray-600 mb-1">
+                                    €{item.pricePerTicket.toFixed(2)} each
+                                  </p>
+                                  {item.ticketCode && (
+                                    <p className="text-xs text-gray-500 font-mono">
+                                      Code: {item.ticketCode}
+                                    </p>
+                                  )}
+                                  {item.isValid === false && (
+                                    <p className="text-xs text-red-600 font-semibold mt-1">
+                                      ⚠️ Invalid (Refunded)
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* QR Code */}
+                                {item.qrCodeUrl && item.isValid !== false ? (
+                                  <div className="flex items-center gap-3">
+                                    <div 
+                                      className="cursor-pointer hover:opacity-75 transition-opacity"
+                                      onClick={() => setSelectedQR(item.qrCodeUrl!)}
+                                    >
+                                      <img 
+                                        src={item.qrCodeUrl} 
+                                        alt="QR Code" 
+                                        className="w-20 h-20 border-2 border-gray-300 rounded-lg"
+                                      />
+                                    </div>
+                                    <button
+                                      onClick={() => setSelectedQR(item.qrCodeUrl!)}
+                                      className="text-blue-600 hover:text-blue-700 font-semibold text-sm"
+                                    >
+                                      View
+                                    </button>
+                                  </div>
+                                ) : order.status === 'CONFIRMED' && !isPastEvent ? (
+                                  <div className="text-sm text-gray-500 italic">
+                                    QR code generating...
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Order Details */}
+                        <div className="border-t pt-4">
+                          <div className="flex flex-col md:flex-row justify-between gap-4">
+                            <div className="text-sm space-y-1">
+                              <div className="flex gap-2">
+                                <span className="text-gray-600">Order ID:</span>
+                                <span className="font-semibold text-gray-800">#{order.id}</span>
+                              </div>
+                              <div className="flex gap-2">
+                                <span className="text-gray-600">Order Date:</span>
+                                <span className="text-gray-800">
+                                  {new Date(order.orderDate).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm text-gray-600 mb-1">Total Paid</p>
+                              <p className="text-2xl font-bold text-gray-800">
+                                €{order.totalAmount.toFixed(2)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-4 flex gap-3">
+                          <button
+                            onClick={() => navigate(`/events/${order.eventId}`)}
+                            className="flex-1 md:flex-none border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors font-semibold"
+                          >
+                            View Event
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
 
         {/* QR Code Modal */}

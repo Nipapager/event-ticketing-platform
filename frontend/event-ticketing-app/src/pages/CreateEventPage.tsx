@@ -16,6 +16,110 @@ interface TicketType {
   description: string;
 }
 
+// Pre-made event images from Unsplash
+const PRESET_IMAGES = [
+  {
+    url: 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800&auto=format&fit=crop',
+    category: 'Concert',
+    description: 'Live concert with crowd'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&auto=format&fit=crop',
+    category: 'Conference',
+    description: 'Business conference'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop',
+    category: 'Concert',
+    description: 'Music festival stage'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&auto=format&fit=crop',
+    category: 'Party',
+    description: 'Night party with lights'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&auto=format&fit=crop',
+    category: 'DJ',
+    description: 'DJ performance'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&auto=format&fit=crop',
+    category: 'Bar',
+    description: 'Bar with cocktails'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&auto=format&fit=crop',
+    category: 'Bar',
+    description: 'Cocktail bar atmosphere'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&auto=format&fit=crop',
+    category: 'Conference',
+    description: 'Tech conference'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&auto=format&fit=crop',
+    category: 'Theater',
+    description: 'Theater performance'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&auto=format&fit=crop',
+    category: 'Festival',
+    description: 'Outdoor music festival'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&auto=format&fit=crop',
+    category: 'Concert',
+    description: 'Stadium concert'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1522158637959-30385a09e0da?w=800&auto=format&fit=crop',
+    category: 'Sports',
+    description: 'Sports stadium'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop',
+    category: 'Party',
+    description: 'Club party lights'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop',
+    category: 'DJ',
+    description: 'DJ mixing music'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=800&auto=format&fit=crop',
+    category: 'Party',
+    description: 'Halloween party'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&auto=format&fit=crop',
+    category: 'Conference',
+    description: 'Workshop event'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?w=800&auto=format&fit=crop',
+    category: 'Concert',
+    description: 'Jazz concert'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop',
+    category: 'Concert',
+    description: 'Hip hop concert'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1519214605650-76a613ee3245?w=800&auto=format&fit=crop',
+    category: 'Bar',
+    description: 'Upscale bar'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1585699324551-f6c309eedeca?w=800&auto=format&fit=crop',
+    category: 'Theater',
+    description: 'Comedy show'
+  }
+];
+
 const CreateEventPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -25,6 +129,7 @@ const CreateEventPage = () => {
   // Modals
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [showVenueModal, setShowVenueModal] = useState(false);
+  const [showImageGallery, setShowImageGallery] = useState(false);
 
   // New category/venue data
   const [newCategory, setNewCategory] = useState({ name: '', description: '' });
@@ -50,7 +155,7 @@ const CreateEventPage = () => {
 
   // Ticket types (at least one required)
   const [ticketTypes, setTicketTypes] = useState<TicketType[]>([
-    { name: 'General Admission', price: '', totalQuantity: '', description: '' }  // Add description
+    { name: 'General Admission', price: '', totalQuantity: '', description: '' }
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -104,6 +209,12 @@ const CreateEventPage = () => {
     if (ticketTypes.length > 1) {
       setTicketTypes(ticketTypes.filter((_, i) => i !== index));
     }
+  };
+
+  const handleSelectPresetImage = (imageUrl: string) => {
+    setFormData({ ...formData, imageUrl });
+    setShowImageGallery(false);
+    toast.success('Image selected!');
   };
 
   // CREATE NEW CATEGORY
@@ -174,7 +285,7 @@ const CreateEventPage = () => {
       if (!ticket.name.trim()) newErrors[`ticket_${index}_name`] = 'Ticket name required';
       if (!ticket.price || parseFloat(ticket.price) <= 0) newErrors[`ticket_${index}_price`] = 'Valid price required';
       if (!ticket.totalQuantity || parseInt(ticket.totalQuantity) <= 0) newErrors[`ticket_${index}_quantity`] = 'Valid quantity required';
-      if (!ticket.description.trim()) newErrors[`ticket_${index}_description`] = 'Description required';  // NEW
+      if (!ticket.description.trim()) newErrors[`ticket_${index}_description`] = 'Description required';
     });
 
     setErrors(newErrors);
@@ -363,19 +474,51 @@ const CreateEventPage = () => {
                 </div>
               </div>
 
-              {/* Image URL */}
+              {/* Image Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Image URL (Optional)
+                  Event Image
                 </label>
+
+                {/* Image Preview */}
+                {formData.imageUrl && (
+                  <div className="mb-3">
+                    <img
+                      src={formData.imageUrl}
+                      alt="Event preview"
+                      className="w-full h-48 object-cover rounded-lg"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x400?text=Invalid+Image+URL';
+                      }}
+                    />
+                  </div>
+                )}
+
+                {/* Image URL Input */}
                 <input
                   type="url"
                   name="imageUrl"
                   value={formData.imageUrl}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2"
                   placeholder="https://example.com/image.jpg"
                 />
+
+                {/* Browse Gallery Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowImageGallery(true)}
+                  className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Browse Image Gallery
+                </button>
+
+                <p className="text-xs text-gray-500 mt-2">
+                  💡 Enter an image URL or choose from our gallery
+                </p>
               </div>
             </div>
           </div>
@@ -508,6 +651,63 @@ const CreateEventPage = () => {
           </div>
         </form>
       </div>
+
+      {/* IMAGE GALLERY MODAL */}
+      {showImageGallery && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-800">Choose an Event Image</h3>
+              <button
+                onClick={() => setShowImageGallery(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {PRESET_IMAGES.map((image, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleSelectPresetImage(image.url)}
+                  className="relative group cursor-pointer rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow"
+                >
+                  <img
+                    src={image.url}
+                    alt={image.description}
+                    className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-end pointer-events-none">
+                    <div className="p-3 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-xs font-semibold">{image.category}</p>
+                      <p className="text-xs">{image.description}</p>
+                    </div>
+                  </div>
+
+                  {formData.imageUrl === image.url && (
+                    <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setShowImageGallery(false)}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ADD CATEGORY MODAL */}
       {showCategoryModal && (
@@ -664,5 +864,4 @@ const CreateEventPage = () => {
     </div>
   );
 };
-
 export default CreateEventPage;

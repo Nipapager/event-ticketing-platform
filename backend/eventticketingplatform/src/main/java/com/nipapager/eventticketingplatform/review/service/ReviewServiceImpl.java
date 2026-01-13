@@ -7,6 +7,7 @@ import com.nipapager.eventticketingplatform.event.repository.EventRepository;
 import com.nipapager.eventticketingplatform.exception.BadRequestException;
 import com.nipapager.eventticketingplatform.exception.ForbiddenException;
 import com.nipapager.eventticketingplatform.exception.NotFoundException;
+import com.nipapager.eventticketingplatform.order.entity.Order;
 import com.nipapager.eventticketingplatform.order.repository.OrderRepository;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.review.dto.ReviewDTO;
@@ -250,13 +251,17 @@ public class ReviewServiceImpl implements ReviewService {
             throw new BadRequestException("Cannot review event that hasn't happened yet");
         }
 
-        // Check if user has completed order for this event
-        boolean hasCompletedOrder = orderRepository.findByUserIdAndStatus(user.getId(), OrderStatus.COMPLETED)
-                .stream()
-                .anyMatch(order -> order.getEvent().getId().equals(event.getId()));
+        // Check if user has CONFIRMED or COMPLETED order for this event
+        List<Order> userOrders = orderRepository.findByUserIdAndEventId(user.getId(), event.getId());
 
-        if (!hasCompletedOrder) {
-            throw new BadRequestException("You must attend the event to leave a review");
+        boolean hasAttendedEvent = userOrders.stream()
+                .anyMatch(order ->
+                        order.getStatus() == OrderStatus.CONFIRMED ||
+                                order.getStatus() == OrderStatus.COMPLETED
+                );
+
+        if (!hasAttendedEvent) {
+            throw new BadRequestException("You must have a confirmed ticket to leave a review");
         }
     }
 
