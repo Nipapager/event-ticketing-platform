@@ -39,6 +39,12 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/session/{sessionId}")
+    public ResponseEntity<Response<OrderDTO>> getOrderBySessionId(@PathVariable String sessionId) {
+        Response<OrderDTO> response = orderService.getOrderBySessionId(sessionId);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{id}/confirm")
     public ResponseEntity<Response<OrderDTO>> confirmOrder(@PathVariable Long id) {
         Response<OrderDTO> response = orderService.confirmOrder(id);

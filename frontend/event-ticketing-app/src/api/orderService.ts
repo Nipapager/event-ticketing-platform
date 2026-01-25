@@ -20,6 +20,12 @@ const orderService = {
     return response.data.data;
   },
 
+  // Get order by session ID
+  getOrderBySessionId: async (sessionId: string): Promise<Order> => {
+    const response = await apiClient.get(`/orders/session/${sessionId}`);
+    return response.data.data;
+  },
+
   // Confirm order (payment simulation)
   confirmOrder: async (id: number): Promise<Order> => {
     const response = await apiClient.put(`/orders/${id}/confirm`);
@@ -29,6 +35,22 @@ const orderService = {
   // Cancel order
   cancelOrder: async (id: number): Promise<Order> => {
     const response = await apiClient.put(`/orders/${id}/cancel`);
+    return response.data.data;
+  },
+
+  // === ADMIN FUNCTIONS ===
+  
+  // Get all orders (Admin only)
+  getAllOrders: async (): Promise<Order[]> => {
+    const response = await apiClient.get('/orders');
+    return response.data.data;
+  },
+
+  // === ORGANIZER FUNCTIONS ===
+  
+  // Get orders by event ID (Organizer/Admin)
+  getOrdersByEventId: async (eventId: number): Promise<Order[]> => {
+    const response = await apiClient.get(`/orders/event/${eventId}`);
     return response.data.data;
   },
 };

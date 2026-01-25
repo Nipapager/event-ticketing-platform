@@ -184,6 +184,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Response<OrderDTO> getOrderBySessionId(String sessionId) {
+        log.info("Fetching order by session id: {}", sessionId);
+
+        // Find order by session id
+        Order order = orderRepository.findByStripeSessionId(sessionId)
+                .orElseThrow(() -> new NotFoundException("Order not found for session: " + sessionId));
+
+        // Get current user
+        User currentUser = userService.getCurrentLoggedInUser();
+
+        // Authorization check - only the user who created the order or admin can view it
+        checkOrderAccess(order, currentUser);
+
+        // Map to DTO
+        OrderDTO orderDTO = mapToDTO(order);
+
+        return Response.<OrderDTO>builder()
+                .statusCode(HttpStatus.OK.value())
+                .message("Order retrieved successfully")
+                .data(orderDTO)
+                .build();
+    }
+
+    @Override
     @Transactional
     public Response<OrderDTO> confirmOrder(Long id) {
         log.info("Confirming order with id: {}", id);

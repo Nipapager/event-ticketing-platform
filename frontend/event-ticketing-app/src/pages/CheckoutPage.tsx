@@ -225,22 +225,7 @@ const CheckoutPage = () => {
               </div>
             </div>
 
-            {/* Customer Details Card */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Customer Details</h2>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                  <p className="text-gray-800">{currentUser?.name}</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <p className="text-gray-800">{currentUser?.email}</p>
-                </div>
-              </div>
-            </div>
+            
 
             {/* Error Message */}
             {error && (

@@ -21,6 +21,9 @@ import PastEventsPage from './pages/PastEventsPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import AdminOrdersPage from './pages/AdminOrdersPage';
+import HelpPage from './pages/HelpPage';
+import AdminDashboard from './pages/AdminDashboard';
+import OrganizerDashboard from './pages/OrganizerDashboard';
 
 function App() {
   return (
@@ -48,6 +51,9 @@ function App() {
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
               <Route path="/payment-cancel" element={<PaymentCancelPage />} />
               <Route path="/admin/orders" element={<AdminOrdersPage />} />
+              <Route path="/help" element={<HelpPage />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
             </Routes>
           </main>
           <Footer />

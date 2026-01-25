@@ -352,8 +352,8 @@ const UserManagerPage = () => {
                             </button>
                           )}
 
-                          {/* Delete User - Cannot delete self */}
-                          {user?.id !== u.id && (
+                          {/* Delete User - Cannot delete self or other admins */}
+                          {user?.id !== u.id && !u.roles.includes('ROLE_ADMIN') && (
                             <button
                               onClick={() => handleDeleteUser(u.id, u.name)}
                               className="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors"

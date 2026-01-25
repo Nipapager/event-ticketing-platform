@@ -62,7 +62,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
         ticketType.setPrice(ticketTypeDTO.getPrice());
         ticketType.setTotalQuantity(ticketTypeDTO.getTotalQuantity());
         ticketType.setQuantityAvailable(ticketTypeDTO.getTotalQuantity());
-        ticketType.setDescription(ticketTypeDTO.getDescription());  // ✅ ADDED
+        ticketType.setDescription(ticketTypeDTO.getDescription());  // âœ… ADDED
         ticketType.setCreatedAt(LocalDateTime.now());
 
         // Save ticket type
@@ -159,10 +159,21 @@ public class TicketTypeServiceImpl implements TicketTypeService {
 
         // Update quantity if provided
         if (ticketTypeDTO.getQuantityAvailable() != null) {
+            // Calculate tickets already sold
+            int ticketsSold = ticketType.getTotalQuantity() - ticketType.getQuantityAvailable();
+
+            // Update available quantity
             ticketType.setQuantityAvailable(ticketTypeDTO.getQuantityAvailable());
+
+            // Update total quantity to reflect the change
+            // New total = tickets already sold + new available quantity
+            ticketType.setTotalQuantity(ticketsSold + ticketTypeDTO.getQuantityAvailable());
+
+            log.info("Updated ticket type {}: ticketsSold={}, newAvailable={}, newTotal={}",
+                    id, ticketsSold, ticketTypeDTO.getQuantityAvailable(), ticketType.getTotalQuantity());
         }
 
-        // Update description if provided  ✅ ADDED
+        // Update description if provided  âœ… ADDED
         if (ticketTypeDTO.getDescription() != null) {
             ticketType.setDescription(ticketTypeDTO.getDescription());
             log.info("Updated description for ticket type {}: {}", id, ticketTypeDTO.getDescription());
@@ -222,7 +233,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
         dto.setEventId(ticketType.getEvent().getId());
         dto.setEventName(ticketType.getEvent().getTitle());
 
-        // Ensure description is never null - return empty string instead  ✅ ADDED
+        // Ensure description is never null - return empty string instead  âœ… ADDED
         if (dto.getDescription() == null) {
             dto.setDescription("");
         }

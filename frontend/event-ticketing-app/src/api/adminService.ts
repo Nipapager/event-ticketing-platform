@@ -1,5 +1,5 @@
 import apiClient from './axios';
-import type { Order } from '../types';
+import type { Order, User } from '../types';
 
 const adminService = {
   // Get all orders
@@ -13,6 +13,12 @@ const adminService = {
     const response = await apiClient.put(`/admin/orders/${id}/refund`);
     return response.data.data;
   },
+
+  // Get all users (Admin only)
+  getAllUsers: async (): Promise<User[]> => {
+    const response = await apiClient.get('/admin/users');
+    return response.data.data;
+  }
 };
 
 export default adminService;

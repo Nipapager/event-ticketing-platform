@@ -14,30 +14,36 @@ const PaymentSuccessPage = () => {
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+
       try {
         // Wait a bit for webhook to process
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Fetch user's orders
-        const orders = await orderService.getMyOrders();
-        
-        // Get the most recent order
-        if (orders && orders.length > 0) {
-          const latestOrder = orders[0];
-          setOrder(latestOrder);
-        }
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Fetch order by session ID
+        const orderData = await orderService.getOrderBySessionId(sessionId);
+        setOrder(orderData);
       } catch (err) {
         console.error('Failed to fetch order details:', err);
+        // Fallback: try to get the latest order
+        try {
+          const orders = await orderService.getMyOrders();
+          if (orders && orders.length > 0) {
+            const latestOrder = orders[0];
+            setOrder(latestOrder);
+          }
+        } catch (fallbackErr) {
+          console.error('Fallback failed:', fallbackErr);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (sessionId) {
-      fetchOrderDetails();
-    } else {
-      setLoading(false);
-    }
+    fetchOrderDetails();
   }, [sessionId]);
 
   const formatDate = (dateString: string) => {
@@ -63,7 +69,6 @@ const PaymentSuccessPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-3xl mx-auto px-4">
-        
         {/* Success Icon */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4">
@@ -119,9 +124,7 @@ const PaymentSuccessPage = () => {
               {/* Total */}
               <div className="flex justify-between items-center pt-4 border-t-2">
                 <span className="text-lg font-bold text-gray-800">Total Amount Paid</span>
-                <span className="text-2xl font-bold text-green-600">
-                  €{order.totalAmount.toFixed(2)}
-                </span>
+                <span className="text-2xl font-bold text-green-600">€{order.totalAmount.toFixed(2)}</span>
               </div>
             </div>
 
@@ -143,12 +146,8 @@ const PaymentSuccessPage = () => {
         ) : (
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <div className="text-center">
-              <p className="text-lg text-gray-700 mb-2">
-                🎉 Payment confirmed! Your tickets have been booked.
-              </p>
-              <p className="text-gray-600">
-                Check "My Tickets" to view your booking.
-              </p>
+              <p className="text-lg text-gray-700 mb-2">🎉 Payment confirmed! Your tickets have been booked.</p>
+              <p className="text-gray-600">Check "My Tickets" to view your booking.</p>
             </div>
           </div>
         )}
@@ -157,7 +156,12 @@ const PaymentSuccessPage = () => {
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex gap-3">
             <svg className="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
             <div>
               <p className="font-semibold text-blue-800 mb-1">What's Next?</p>
@@ -177,7 +181,12 @@ const PaymentSuccessPage = () => {
             className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+              />
             </svg>
             View My Tickets
           </button>
@@ -188,7 +197,6 @@ const PaymentSuccessPage = () => {
             Browse More Events
           </button>
         </div>
-
       </div>
     </div>
   );

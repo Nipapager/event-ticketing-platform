@@ -15,6 +15,15 @@ const EventManagerPage = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('PENDING');
 
+  // Confirmation modal state (same concept as UserManagerPage)
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'approve' | 'reject';
+    onConfirm: () => void;
+  } | null>(null);
+
   useEffect(() => {
     // Check if user is admin
     if (!authService.isAuthenticated() || !user?.roles?.includes('ROLE_ADMIN')) {
@@ -23,10 +32,12 @@ const EventManagerPage = () => {
     }
 
     fetchAllEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     applyFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [events, filter]);
 
   const fetchAllEvents = async () => {
@@ -50,28 +61,44 @@ const EventManagerPage = () => {
     }
   };
 
-  const handleApprove = async (id: number) => {
-    if (!window.confirm('Are you sure you want to approve this event?')) return;
-
-    try {
-      await eventService.approveEvent(id);
-      toast.success('Event approved successfully!');
-      fetchAllEvents();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to approve event');
-    }
+  const handleApprove = (eventId: number, eventTitle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Approve Event',
+      message: `Are you sure you want to approve "${eventTitle}"? It will become visible to users.`,
+      type: 'approve',
+      onConfirm: async () => {
+        try {
+          await eventService.approveEvent(eventId);
+          toast.success('Event approved successfully!');
+          fetchAllEvents();
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || 'Failed to approve event');
+        } finally {
+          setConfirmModal(null);
+        }
+      }
+    });
   };
 
-  const handleReject = async (id: number) => {
-    if (!window.confirm('Are you sure you want to reject this event?')) return;
-
-    try {
-      await eventService.rejectEvent(id);
-      toast.success('Event rejected');
-      fetchAllEvents();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to reject event');
-    }
+  const handleReject = (eventId: number, eventTitle: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Reject Event',
+      message: `Are you sure you want to reject "${eventTitle}"?`,
+      type: 'reject',
+      onConfirm: async () => {
+        try {
+          await eventService.rejectEvent(eventId);
+          toast.success('Event rejected');
+          fetchAllEvents();
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || 'Failed to reject event');
+        } finally {
+          setConfirmModal(null);
+        }
+      }
+    });
   };
 
   const getStatusBadge = (status: string) => {
@@ -83,7 +110,11 @@ const EventManagerPage = () => {
     };
 
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-semibold ${
+          styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'
+        }`}
+      >
         {status}
       </span>
     );
@@ -175,15 +206,16 @@ const EventManagerPage = () => {
 
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'ALL'].map(status => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === status
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filter === status
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                }`}
               >
                 {status}
               </button>
@@ -216,7 +248,7 @@ const EventManagerPage = () => {
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-2xl font-bold text-gray-800 mb-2">{event.title}</h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-2 flex-wrap">
                           <span className="flex items-center gap-1">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -271,7 +303,7 @@ const EventManagerPage = () => {
                       {event.status === 'PENDING' && (
                         <>
                           <button
-                            onClick={() => handleApprove(event.id)}
+                            onClick={() => handleApprove(event.id, event.title)}
                             className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +312,7 @@ const EventManagerPage = () => {
                             Approve
                           </button>
                           <button
-                            onClick={() => handleReject(event.id)}
+                            onClick={() => handleReject(event.id, event.title)}
                             className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,6 +330,59 @@ const EventManagerPage = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal?.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <div className="flex items-start gap-4 mb-4">
+              <div
+                className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
+                  confirmModal.type === 'reject' ? 'bg-red-100' : 'bg-green-100'
+                }`}
+              >
+                {confirmModal.type === 'reject' ? (
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-gray-800 mb-2">
+                  {confirmModal.title}
+                </h3>
+                <p className="text-gray-600">
+                  {confirmModal.message}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setConfirmModal(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className={`flex-1 px-4 py-2 text-white rounded-lg transition-colors font-medium ${
+                  confirmModal.type === 'reject'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                {confirmModal.type === 'reject' ? 'Reject' : 'Approve'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

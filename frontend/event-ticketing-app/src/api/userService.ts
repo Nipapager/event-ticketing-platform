@@ -17,6 +17,20 @@ const userService = {
     const response = await api.put('/users/profile', userData);
     return response.data.data;
   },
+
+  // === ADMIN FUNCTIONS ===
+  
+  // Get all users (Admin only)
+  getAllUsers: async (): Promise<User[]> => {
+    const response = await api.get('/users');
+    return response.data.data;
+  },
+
+  // Update user roles (Admin only)
+  updateUserRoles: async (userId: number, roles: string[]): Promise<User> => {
+    const response = await api.put(`/users/${userId}/roles`, { roles });
+    return response.data.data;
+  },
 };
 
 export default userService;

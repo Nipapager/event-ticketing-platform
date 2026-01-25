@@ -52,6 +52,7 @@ public class Order {
     @Column(unique = true)
     private String stripeSessionId;
 
+
     private LocalDateTime orderDate;
     private LocalDateTime updatedAt;
 

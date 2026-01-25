@@ -28,4 +28,6 @@ public interface OrderService {
     Response<List<OrderDTO>> getOrdersByEventId(Long eventId);
 
     Response<OrderDTO> refundOrder(Long id);
+
+    Response<OrderDTO> getOrderBySessionId(String sessionId);
 }

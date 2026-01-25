@@ -342,9 +342,7 @@ const EventDetailsPage = () => {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-800">{event.organizerName}</p>
-                  <button className="text-blue-600 text-sm hover:underline mt-1">
-                    Contact
-                  </button>
+                  
                 </div>
               </div>
             </div>
