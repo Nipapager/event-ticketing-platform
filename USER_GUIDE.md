@@ -10,7 +10,7 @@ EventSpot uses three primary roles that affect navigation and page access:
 - **ROLE_ORGANIZER**: Includes all ROLE_USER capabilities plus event creation and management features such as “My Events,” “Create Event,” and the Organizer Dashboard (analytics).
 - **ROLE_ADMIN**: Includes all organizer/user capabilities plus administrative management features (Admin Dashboard, Event Manager, User Manager, Orders Manager). Admin-only pages validate the admin role and redirect non-admin users away.
 
-> **Note:** The router defines all user-facing pages, while many pages also include client-side checks to redirect unauthenticated users or users without the right role.【F:frontend/event-ticketing-app/src/App.tsx†L1-L90】
+> **Note:** The router defines all user-facing pages, while many pages also include client-side checks to redirect unauthenticated users or users without the right role.
 
 ## Page-by-Page Guide (Routes, Purpose, Access)
 Below is every page exposed by the front-end router and what it is used for.
