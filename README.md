@@ -3,8 +3,6 @@
 A full-stack event ticketing and management platform built with Spring Boot and React.  
 This project was developed as part of the Coding Factory program at OPA and demonstrates a complete event lifecycle, from creation and approval to ticket sales, QR code validation, reviews, and analytics.
 
-EventSpot is designed to be **fully functional even without external services** such as Stripe or email providers, making it easy to run locally and safe to share on GitHub.
-
 ---
 
 ## What It Does
