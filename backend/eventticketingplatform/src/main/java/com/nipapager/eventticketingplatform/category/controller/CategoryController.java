@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.category.controller;
 import com.nipapager.eventticketingplatform.category.dto.CategoryDTO;
 import com.nipapager.eventticketingplatform.category.service.CategoryService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
+@Tag(name = "Categories", description = "Event categories management")
 public class CategoryController {
 
     private final CategoryService categoryService;

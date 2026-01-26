@@ -13,7 +13,7 @@ const MyEventsPage = () => {
   const [filter, setFilter] = useState<string>('ALL');
   const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
 
-  // ✅ NEW: confirmation modal state
+  // confirmation modal state
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<{ id: number; title: string } | null>(null);
   const [cancelling, setCancelling] = useState(false);
@@ -88,7 +88,7 @@ const MyEventsPage = () => {
     ? displayEvents
     : displayEvents.filter(event => event.status === filter);
 
-  // ✅ NEW: open/close modal
+  // open/close modal
   const openCancelModal = (event: Event) => {
     setCancelTarget({ id: event.id as number, title: event.title });
     setCancelModalOpen(true);
@@ -100,7 +100,7 @@ const MyEventsPage = () => {
     setCancelTarget(null);
   };
 
-  // ✅ NEW: confirmed cancel action
+  // confirmed cancel action
   const confirmCancel = async () => {
     if (!cancelTarget) return;
 

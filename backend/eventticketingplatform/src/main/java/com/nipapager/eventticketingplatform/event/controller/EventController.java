@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.event.controller;
 import com.nipapager.eventticketingplatform.event.dto.EventDTO;
 import com.nipapager.eventticketingplatform.event.service.EventService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/events")
 @RequiredArgsConstructor
+@Tag(name = "Event Management", description = "Create, update, delete, and retrieve events")
 public class EventController {
 
     private final EventService eventService;

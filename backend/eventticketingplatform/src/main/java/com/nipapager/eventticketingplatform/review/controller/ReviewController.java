@@ -4,6 +4,7 @@ import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.review.dto.ReviewDTO;
 import com.nipapager.eventticketingplatform.review.dto.ReviewSummaryDTO;
 import com.nipapager.eventticketingplatform.review.service.ReviewService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
+@Tag(name = "Reviews", description = "Event reviews and ratings")
+
 public class ReviewController {
 
     private final ReviewService reviewService;

@@ -372,9 +372,6 @@ const AdminDashboard = () => {
 
     setCategoryData(categoryChartData);
 
-    // ✅ Removed ONLY:
-    // - User Growth Over Time
-    // - Order Status Distribution
   };
 
   const formatCurrency = (value: number) => `€${value.toFixed(2)}`;

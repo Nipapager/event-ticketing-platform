@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.venue.controller;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.venue.dto.VenueDTO;
 import com.nipapager.eventticketingplatform.venue.service.VenueService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/venues")
 @RequiredArgsConstructor
+@Tag(name = "Venues", description = "Event venues management")
 public class VenueController {
 
     private final VenueService venueService;

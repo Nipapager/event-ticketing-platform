@@ -4,6 +4,7 @@ import com.nipapager.eventticketingplatform.enums.UserRole;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.role.dto.RoleDTO;
 import com.nipapager.eventticketingplatform.role.service.RoleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
+@Tag(name = "Roles", description = "User roles management")
 public class RoleController {
     private final RoleService roleService;
 

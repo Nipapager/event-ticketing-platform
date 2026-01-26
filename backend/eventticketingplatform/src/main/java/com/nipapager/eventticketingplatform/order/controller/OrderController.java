@@ -4,6 +4,7 @@ import com.nipapager.eventticketingplatform.order.dto.OrderDTO;
 import com.nipapager.eventticketingplatform.order.request.OrderRequest;
 import com.nipapager.eventticketingplatform.order.service.OrderService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
+@Tag(name = "Orders", description = "User order management and ticket purchasing")
 public class OrderController {
 
     private final OrderService orderService;

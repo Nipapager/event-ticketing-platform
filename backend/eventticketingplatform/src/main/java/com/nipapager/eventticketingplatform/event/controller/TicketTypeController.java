@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.event.controller;
 import com.nipapager.eventticketingplatform.event.dto.TicketTypeDTO;
 import com.nipapager.eventticketingplatform.event.service.TicketTypeService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/ticket-types")
 @RequiredArgsConstructor
+@Tag(name = "Ticket Types", description = "Ticket type management for events")
 public class TicketTypeController {
 
     private final TicketTypeService ticketTypeService;

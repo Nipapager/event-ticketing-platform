@@ -4,6 +4,7 @@ import com.nipapager.eventticketingplatform.payment.dto.CheckoutResponse;
 import com.nipapager.eventticketingplatform.payment.dto.CreateCheckoutRequest;
 import com.nipapager.eventticketingplatform.payment.service.PaymentService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Payments", description = "Stripe payment processing and webhooks")
 public class PaymentController {
 
     private final PaymentService paymentService;

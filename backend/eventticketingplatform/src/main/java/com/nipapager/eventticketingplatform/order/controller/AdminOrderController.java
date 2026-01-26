@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.order.controller;
 import com.nipapager.eventticketingplatform.order.dto.OrderDTO;
 import com.nipapager.eventticketingplatform.order.service.OrderService;
 import com.nipapager.eventticketingplatform.response.Response;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "Order Management (Admin)", description = "Admin endpoints for viewing and managing all orders")
 public class AdminOrderController {
 
     private final OrderService orderService;

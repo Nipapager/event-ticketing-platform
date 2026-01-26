@@ -3,6 +3,7 @@ package com.nipapager.eventticketingplatform.user.controller;
 import com.nipapager.eventticketingplatform.response.Response;
 import com.nipapager.eventticketingplatform.user.dto.UserDTO;
 import com.nipapager.eventticketingplatform.user.service.UserManagementService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@Tag(name = "User Management (Admin)", description = "Admin endpoints for managing users and roles")
 public class UserManagementController {
 
     private final UserManagementService userManagementService;
